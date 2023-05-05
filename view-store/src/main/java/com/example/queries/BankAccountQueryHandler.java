@@ -7,8 +7,8 @@ import com.example.dto.BankAccountResponseDTO;
 import io.smallrye.mutiny.Uni;
 import org.jboss.logging.Logger;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.List;
 
 @ApplicationScoped

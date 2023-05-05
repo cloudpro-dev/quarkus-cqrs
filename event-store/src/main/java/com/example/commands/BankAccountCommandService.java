@@ -3,7 +3,7 @@ package com.example.commands;
 import com.example.event.BalanceDepositEvent;
 import io.smallrye.mutiny.Uni;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 public interface BankAccountCommandService {
     Uni<String> handle(CreateBankAccountCommand command);

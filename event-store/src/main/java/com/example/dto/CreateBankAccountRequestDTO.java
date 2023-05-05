@@ -1,8 +1,8 @@
 package com.example.dto;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public record CreateBankAccountRequestDTO(
     @Email @NotBlank @Size(min = 10, max = 250) String email,

@@ -5,11 +5,11 @@ import com.example.dto.*;
 import io.smallrye.mutiny.Uni;
 import org.jboss.logging.Logger;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @Path("/api/v1/bank")
 @Produces(MediaType.APPLICATION_JSON)
