@@ -77,7 +77,7 @@ public class BankAccountSimulation extends Simulation {
     {
         setUp(
             // users.injectOpen(atOnceUsers(1)),
-            users.injectOpen(rampUsers(100).during(10))
+            users.injectOpen(rampUsers(100).during(30))
         ).protocols(httpProtocol);
     }
 

@@ -1,0 +1,160 @@
+version: "3.9"
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-remote-write-receiver'
+      - '--enable-feature=exemplar-storage'
+    volumes:
+      - prometheus_data:/prometheus
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - cqrs
+
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yml" ]
+    volumes:
+      - ./monitoring/tempo/tempo.yml:/etc/tempo.yml
+      - tempo_data:/tmp/tempo
+    ports:
+      - "3200:3200"  # tempo
+      - "4317:4317"  # otlp grpc
+    networks:
+      - cqrs
+
+  #  tempo_query:
+  #    image: grafana/tempo-query:latest
+  #    command: [ "--grpc-storage-plugin.configuration-file=/etc/tempo-query.yml" ]
+  #    volumes:
+  #      - ./monitoring/tempo/tempo-query.yml:/etc/tempo-query.yml
+  #    ports:
+  #      - "16686:16686" # Jaeger UI
+  #    networks:
+  #      - cqrs
+  #    depends_on:
+  #      - prometheus
+
+  #  jaeger:
+  #    restart: always
+  #    image: jaegertracing/all-in-one:latest
+  #    environment:
+  #      - METRICS_STORAGE_TYPE=prometheus
+  #      - PROMETHEUS_SERVER_URL=http://prometheus:9090
+  #    ports:
+  #      - "16686:16686" # Jaeger UI
+  #      - "14269:14269" # Admin port
+  #      - "14250:14250" # Receive from external otel-collector
+  #    networks:
+  #      - cqrs
+  #    depends_on:
+  #      - prometheus
+
+  #  otel_collector:
+  #    restart: always
+  #    image: otel/opentelemetry-collector-contrib:latest
+  #    volumes:
+  #      - "./monitoring/otel/otel-collector-connector-config.yml:/etc/otelcol/otel-collector-config.yml"
+  #    command: --config /etc/otelcol/otel-collector-config.yml
+  #    ports:
+  #      - "8888:8888" # Prometheus metrics exposed by the collector
+  #      - "8889:8889" # Prometheus exporter metrics
+  #      - "4317:4317" # OTLP gRPC receiver
+  #      - "4318:4318" # OTLP HTTP receiver
+  #    networks:
+  #      - cqrs
+  #    depends_on:
+  #      - jaeger
+
+#  otel_collector:
+#    image: otel/opentelemetry-collector:latest
+#    command: [ "--config=/etc/otel-collector.yml" ]
+#    volumes:
+#      - ./monitoring/otel/otel-collector.yml:/etc/otel-collector.yml
+#    ports:
+#      - "4317:4317" # OTLP gRPC receiver
+#    networks:
+#      - cqrs
+#    depends_on:
+#      - tempo
+
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      - /:/host:ro,rslave
+    command:
+      - '--path.rootfs=/host'
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points'
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    ports:
+      - "9101:9100"
+    networks:
+      - cqrs
+
+  elasticsearch:
+    image: docker.io/elastic/elasticsearch:7.16.3
+    environment:
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      discovery.type: "single-node"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - cqrs
+
+  logstash:
+    image: docker.io/elastic/logstash:7.16.3
+    volumes:
+      - ./monitoring/logstash/gelf.conf:/usr/share/logstash/pipeline/gelf.conf:ro
+    ports:
+      - "12201:12201/udp"
+      - "5000:5000"
+      - "9600:9600"
+    networks:
+      - cqrs
+    depends_on:
+      - elasticsearch
+
+  grafana:
+    restart: always
+    image: grafana/grafana
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_FEATURE_TOGGLES_ENABLE=tempoSearch traceqlEditor
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./monitoring/grafana/provisioning/dashboards/:/etc/grafana/provisioning/dashboards/
+    ports:
+      - '3005:3000'
+    networks:
+      - cqrs
+    depends_on:
+      - prometheus
+      - tempo
+      - elasticsearch
+      - node_exporter
+
+volumes:
+  grafana_data:
+  #  jaeger_data:
+  prometheus_data:
+  tempo_data:
+
+networks:
+  cqrs:
+    driver: bridge

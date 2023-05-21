@@ -3,25 +3,29 @@ global:
   evaluation_interval: 10s
 
 scrape_configs:
-  - job_name: 'prometheus'
-    static_configs:
-      - targets: [ 'localhost:9090' ]
+#  - job_name: 'prometheus'
+#    static_configs:
+#      - targets: [ 'localhost:9090' ]
+#
+#  - job_name: 'aggregated-trace-metrics'
+#    metrics_path: '/metrics'
+#    static_configs:
+#      - targets: [ 'otel_collector:8889' ]
+#
+#  - job_name: 'tempo'
+#    static_configs:
+#      - targets: [ 'tempo:3200' ]
+#
+#  - job_name: 'system'
+#    static_configs:
+#      - targets: [ 'host.docker.internal:9101' ]
 
-  - job_name: 'aggregated-trace-metrics'
-    metrics_path: '/metrics'
-    static_configs:
-      - targets: [ 'otel_collector:8889' ]
-
-  - job_name: 'system'
-    static_configs:
-      - targets: [ 'host.docker.internal:9101' ]
-
-  - job_name: 'event-store'
-    metrics_path: '/q/metrics'
-    static_configs:
-      - targets: [ 'host.docker.internal:9020' ]
-
-  - job_name: 'view-store'
-    metrics_path: '/q/metrics'
-    static_configs:
-      - targets: [ 'host.docker.internal:9010' ]
+#  - job_name: 'event-store'
+#    metrics_path: '/q/metrics'
+#    static_configs:
+#      - targets: [ 'host.docker.internal:9020' ]
+#
+#  - job_name: 'view-store'
+#    metrics_path: '/q/metrics'
+#    static_configs:
+#      - targets: [ 'host.docker.internal:9010' ]

@@ -135,17 +135,48 @@ http://localhost:9090/
 Elasticsearch
 http://localhost:9200/
 
-# Jaeger Query
-To show the metrics which are collected by Prometheus from OTel Collector:
-```shell
-http://localhost:14269/metrics
-```
-
 # Open Telemetry Collector
 
 To show the metrics which are collected by Prometheus from OTel Collector:
 ```shell
 curl http://localhost:8889/metrics
+```
+
+# Tempo
+
+## Configuration
+```shell
+curl localhost:3200/status/config | grep metrics
+```
+
+## Metrics
+Tempo will show metrics which indicate the state of the `metrics-generator`:
+```shell
+curl http://localhost:3200/metrics | grep tempo_metrics_generator
+```
+
+## Trace by ID
+```shell
+curl http://localhost:3200/api/traces/154634d2162353cb2d0ed94ab1bde6f0
+```
+
+Tempo [span metrics processor](https://grafana.com/docs/tempo/latest/metrics-generator/span_metrics/) exports the following metrics to the configured Prometheus instance:
+- `traces_spanmetrics_latency` - Duration of the span (Histogram)
+- `traces_spanmetrics_calls_total` - Total count of the span (Counter)
+- `traces_spanmetrics_size_total` - Total size of spans ingested (Counter)
+
+Tempo [service graphs](https://grafana.com/docs/tempo/latest/metrics-generator/service_graphs/#service-graphs) exports the following metrics to the configured Prometheus instance:
+- `traces_service_graph_request_total` - Total count of requests between two nodes (Counter)
+- `traces_service_graph_request_failed_total` - Total count of failed requests between two nodes (Counter)
+- `traces_service_graph_request_server_seconds` - Time for a request between two nodes as seen from the server (Histogram)
+- `traces_service_graph_request_client_seconds` - Time for a request between two nodes as seen from the client (Histogram)
+- `traces_service_graph_unpaired_spans_total` - Total count of unpaired spans (Counter)
+- `traces_service_graph_dropped_spans_total` - Total count of dropped spans (Counter)
+
+Query Prometheus for the relevant metrics:
+```shell
+curl 'http://localhost:9090/api/v1/query?query=traces_spanmetrics_latency_bucket'
+{"status":"success","data":{"resultType":"vector","result":[]}}
 ```
 
 # ElasticSearch
