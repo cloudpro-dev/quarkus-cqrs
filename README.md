@@ -121,4 +121,76 @@ docker-compose exec kafka /kafka/bin/kafka-console-consumer.sh \
 # Production mode
 To run in `prod` profile from your IDE, you will need to add a VM Options for `-Dquarkus.profile=prod`
 
+# Monitoring
 
+Jaeger UI
+http://localhost:16686/
+
+Grafana UI
+http://localhost:3005/
+
+Prometheus UI
+http://localhost:9090/
+
+Elasticsearch
+http://localhost:9200/
+
+# Jaeger Query
+To show the metrics which are collected by Prometheus from OTel Collector:
+```shell
+http://localhost:14269/metrics
+```
+
+# Open Telemetry Collector
+
+To show the metrics which are collected by Prometheus from OTel Collector:
+```shell
+curl http://localhost:8889/metrics
+```
+
+# ElasticSearch
+
+To view the indices that have been created on ElasticSearch use the following command:
+```shell
+curl http://localhost:9200/_cat/indices?v
+```
+To view all results delivered to ElasticSearch index:
+```shell
+curl http://localhost:9200/_search | jq 
+```
+Search for a specific 
+```shell
+curl -X GET "http://localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+    "query": {
+        "query_string" : {
+            "query" : "(traceId:6a3a514cf139c5ae1d166a235fb3d46f)"
+        }
+    }
+}'
+```
+
+# Logstash
+
+```shell
+curl -XGET 'localhost:9600/?pretty'
+curl -XGET 'localhost:9600/_node/pipelines?pretty'
+```
+
+You can test that the Logstash server is receiving data by using the `nc` command:
+```shell
+echo '{"message": {"someField":"someValue"} }' > tmp.json
+nc localhost:5400 < tmp.json
+```
+
+# Exemplars
+
+Quarkus supports Exemplars (metrics with an associated traceId and spanId) via Prometheus using the standard `quarkus-micrometer-prometheus` extension.
+
+By adding the `@Timed` or `@Counter` annotation to your methods, you will see that Prometheus metrics will contain the extra information.
+```shell
+curl -v http://localhost:9010/q/metrics | grep hello
+hello_world_timer_seconds_bucket{class="com.example.BankAccountResource",exception="none",method="getAllByBalance",le="0.016777216"} 2.0 # {span_id="d1f2591c877b95b9",trace_id="08c32eb410514f827454363c63fc1ebb"} 0.016702041 1684067985.642
+hello_world_counter_total{class="com.example.BankAccountResource",exception="none",method="getAllByBalance",result="success"} 2.0 # {span_id="d1f2591c877b95b9",trace_id="08c32eb410514f827454363c63fc1ebb"} 1.0 1684067985.638
+```
+_Note: Not every entry will have traceId and spanId as Exemplars are sampled data, not all the data._

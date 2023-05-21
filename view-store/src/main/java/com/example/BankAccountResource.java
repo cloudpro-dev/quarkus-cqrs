@@ -3,6 +3,10 @@ package com.example;
 import com.example.queries.BankAccountQueryService;
 import com.example.queries.FindAllByBalanceQuery;
 import com.example.queries.GetBankAccountByIdQuery;
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import io.quarkus.panache.common.Page;
 import io.smallrye.mutiny.Uni;
 import org.jboss.logging.Logger;
@@ -33,8 +37,11 @@ public class BankAccountResource {
 
     @GET
     @Path("/balance")
+    @Timed(value="hello_world_timer", histogram = true)
+    @Counted(value="hello_world_counter")
     public Uni<Response> getAllByBalance(@QueryParam("page") Optional<Integer> page, @QueryParam("size") Optional<Integer> size) {
         final var query = new FindAllByBalanceQuery(Page.of(page.orElse(0), size.orElse(5)));
+        logger.infof("(HTTP getAllByBalance) FindAllByBalanceQuery: %s", query);
         return queryService.handle(query).onItem().transform(result -> Response.status(Response.Status.OK).entity(result).build());
     }
 
