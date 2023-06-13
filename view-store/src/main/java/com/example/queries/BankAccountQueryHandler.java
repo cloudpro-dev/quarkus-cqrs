@@ -1,5 +1,6 @@
 package com.example.queries;
 
+import com.example.exception.BankAccountNotFoundException;
 import com.example.util.BankAccountMapper;
 import com.example.domain.BankAccountDocument;
 import com.example.repository.BankAccountMongoRepository;
@@ -22,6 +23,7 @@ public class BankAccountQueryHandler implements BankAccountQueryService {
     @Override
     public Uni<BankAccountResponseDTO> handle(GetBankAccountByIdQuery query) {
         return panacheRepository.findByAggregateId(query.aggregateId())
+                .onItem().ifNull().failWith(BankAccountNotFoundException::new)
                 .onItem().transform(BankAccountMapper::bankAccountResponseDTOFromDocument)
                 .onItem().invoke(bankAccountResponseDTO -> logger.infof("(FIND panacheRepository.findByAggregateId) bankAccountResponseDTO: %s", bankAccountResponseDTO))
                 .onFailure().invoke(ex -> logger.errorf("mongo aggregate not found: %s", ex.getMessage()));

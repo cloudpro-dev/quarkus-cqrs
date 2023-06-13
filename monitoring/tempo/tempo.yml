@@ -13,14 +13,14 @@ metrics_generator:
     span_metrics:
       dimensions:
         - http.method
-        - http.target
-        - http.status_code
+#        - http.target
+#        - http.status_code
         - service.version
     service_graphs:
       dimensions:
         - http.method
-        - http.target
-        - http.status_code
+#        - http.target
+#        - http.status_code
         - service.version
   registry:
     collection_interval: 5s

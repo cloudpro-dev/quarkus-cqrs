@@ -1,6 +1,6 @@
 global:
-  scrape_interval: 10s
-  evaluation_interval: 10s
+  scrape_interval: 5s
+  evaluation_interval: 5s
 
 scrape_configs:
 #  - job_name: 'prometheus'
@@ -20,12 +20,12 @@ scrape_configs:
 #    static_configs:
 #      - targets: [ 'host.docker.internal:9101' ]
 
-#  - job_name: 'event-store'
-#    metrics_path: '/q/metrics'
-#    static_configs:
-#      - targets: [ 'host.docker.internal:9020' ]
-#
-#  - job_name: 'view-store'
-#    metrics_path: '/q/metrics'
-#    static_configs:
-#      - targets: [ 'host.docker.internal:9010' ]
+  - job_name: 'event-store'
+    metrics_path: '/q/metrics'
+    static_configs:
+      - targets: [ 'host.docker.internal:9020' ]
+
+  - job_name: 'view-store'
+    metrics_path: '/q/metrics'
+    static_configs:
+      - targets: [ 'host.docker.internal:9010' ]

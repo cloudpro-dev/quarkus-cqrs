@@ -6,71 +6,83 @@ deleteDatasources:
     orgId: 1
   - name: Tempo
     orgId: 1
-#  - name: Jaeger
-#    orgId: 1
-  - name: Elasticsearch
+  - name: Loki
     orgId: 1
 
 datasources:
   - name: Prometheus
     type: prometheus
+    uid: e4e0224e-c538-4ae6-9468-dbcdb40209c0
     access: proxy
     orgId: 1
     url: http://prometheus:9090
     basicAuth: false
-    isDefault: false
+    isDefault: true
     version: 1
     editable: true
-    uid: e4e0224e-c538-4ae6-9468-dbcdb40209c0
-  #  - name: Jaeger
-#    type: jaeger
-#    access: proxy
-#    orgId: 1
-#    url: http://jaeger:16686
-#    basicAuth: false
-#    isDefault: false
-#    version: 1
-#    editable: true
-#    apiVersion: 1
-#    uid: c536e3ff-1f5f-481b-82ea-614f4aaefb80
+    jsonData:
+      httpMethod: POST
+      defaultEditor: code
+      prometheusType: Prometheus
+      prometheusVersion: 2.40.1
   - name: Tempo
     type: tempo
+    uid: 337b05fb-0159-4229-b9ce-ca151182522f
     access: proxy
     orgId: 1
     url: http://tempo:3200
     basicAuth: false
-    isDefault: true
-    version: 1
+    isDefault: false
     editable: true
-    apiVersion: 1
-    uid: 337b05fb-0159-4229-b9ce-ca151182522f
     jsonData:
-      httpMethod: GET
-      nodeGraph:
-        enabled: true
-      serviceMap:
-        datasourceUid: e4e0224e-c538-4ae6-9468-dbcdb40209c0
-      spanBar:
-        type: Duration
       traceQuery:
         timeShiftEnabled: false
+        spanEndTimeShift: ""
+        spanStartTimeShift: ""
+      traceToMetrics:
+        datasourceUid: e4e0224e-c538-4ae6-9468-dbcdb40209c0
+        spanStartTimeShift: "-1h"
+        spanEndTimeShift: "+1h"
+        tags: [ { key: "instance" } ]
+        queries:
+          - name: "Sample query"
+            query: "sum(rate(traces_spanmetrics_latency_bucket{$__tags}[5m]))"
+#        queries: [
+#          { name: "Request rate", query: "rate(request_total{$__tags}[5m])" },
+#          { name: "Error rate", query: "rate(errors_total{$__tags}[5m])" },
+#          { name: "P90 Latency", query: "histogram(quantile(0.9, sum(rate(request_seconds{$__tags}[5m])) by (le))" }
+#        ]
       tracesToLogsV2:
-        datasourceUid: cf73c39a-eb50-4a43-b0ce-1b6e9abc5c93
-  - name: Elasticsearch
-    type: elasticsearch
+        customQuery: true
+        datasourceUid: 82d6c268-7337-45af-aa2d-2d509cd46bef
+        spanStartTimeShift: "-1m"
+        spanEndTimeShift: "+1m"
+        tags: ["traceId"]
+        query: "{$${__tags}}"
+        filterByTraceID: false
+        filterBySpanID: false
+      nodeGraph:
+        enabled: true
+      search:
+        hide: false
+      lokiSearch:
+        datasourceUid: 82d6c268-7337-45af-aa2d-2d509cd46bef
+      serviceMap:
+        datasourceUid: e4e0224e-c538-4ae6-9468-dbcdb40209c0
+      #      spanBar:
+      #        type: Duration
+      spanBar:
+        type: "Tag"
+        tag: "http.path"
+  - name: Loki
+    type: loki
     access: proxy
     orgId: 1
-    url: http://elasticsearch:9200
+    url: http://loki:3100
     basicAuth: false
     isDefault: false
     version: 1
     editable: true
     apiVersion: 1
-    database: "cqrs-logstash-index"
-    uid: cf73c39a-eb50-4a43-b0ce-1b6e9abc5c93
-    jsonData:
-      includeFrozen: false
-      logLevelField: "Severity"
-      logMessageField: "message"
-      maxConcurrentShardRequests: 5
-      timeField: "@timestamp"
+    database: ""
+    uid: 82d6c268-7337-45af-aa2d-2d509cd46bef

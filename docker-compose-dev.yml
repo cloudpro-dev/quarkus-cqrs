@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  event-store:
+    image: geek/cqrs-event-store:1.0.0-SNAPSHOT
+    ports:
+      - "9020:9020"
+    networks:
+      - cqrs
+
+  view-store:
+    image: geek/cqrs-view-store:1.0.0-SNAPSHOT
+    ports:
+      - "9010:9010"
+    networks:
+      - cqrs
+
+networks:
+  cqrs:
+    driver: bridge

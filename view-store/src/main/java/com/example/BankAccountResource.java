@@ -37,8 +37,6 @@ public class BankAccountResource {
 
     @GET
     @Path("/balance")
-    @Timed(value="hello_world_timer", histogram = true)
-    @Counted(value="hello_world_counter")
     public Uni<Response> getAllByBalance(@QueryParam("page") Optional<Integer> page, @QueryParam("size") Optional<Integer> size) {
         final var query = new FindAllByBalanceQuery(Page.of(page.orElse(0), size.orElse(5)));
         logger.infof("(HTTP getAllByBalance) FindAllByBalanceQuery: %s", query);

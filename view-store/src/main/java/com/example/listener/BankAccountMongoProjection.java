@@ -5,6 +5,7 @@ import com.example.events.*;
 import com.example.exception.InvalidEventTypeException;
 import com.example.repository.BankAccountMongoRepository;
 import com.example.util.SerializerUtils;
+import io.micrometer.core.annotation.Timed;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
@@ -23,6 +24,7 @@ public class BankAccountMongoProjection implements Projection {
     BankAccountMongoRepository repository;
 
     @Incoming(value = "event-store")
+    @Timed(value = "view_store_message_process", histogram = true)
     public Uni<Void> process(Message<byte[]> message) {
         logger.infof("(consumer) process events: >>>>> %s", new String(message.getPayload()));
         final Event[] events = SerializerUtils.deserializeEventsFromJsonBytes(message.getPayload());
