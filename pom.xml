@@ -1,22 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>com.example</groupId>
   <artifactId>quarkus-cqrs</artifactId>
   <version>1.0.0-SNAPSHOT</version>
-
   <packaging>pom</packaging>
-
   <modules>
     <module>event-store</module>
     <module>view-store</module>
   </modules>
-
   <properties>
     <compiler-plugin.version>3.10.1</compiler-plugin.version>
+    <lombok.version>1.18.22</lombok.version>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -25,9 +21,9 @@
     <quarkus.platform.version>3.0.2.Final</quarkus.platform.version>
     <skipITs>true</skipITs>
     <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
-    <lombok.version>1.18.22</lombok.version>
+    <assertj.version>3.22.0</assertj.version>
+    <net.mguenther.kafka.version>3.4.0</net.mguenther.kafka.version>
   </properties>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -37,9 +33,13 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>${assertj.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
-
   <dependencies>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -63,6 +63,12 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-reactive-messaging-kafka</artifactId>
     </dependency>
+    <!-- Docker container builds -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-container-image-jib</artifactId>
+    </dependency>
+    <!-- Testing -->
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-junit5</artifactId>
@@ -73,8 +79,23 @@
       <artifactId>rest-assured</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.mguenther.kafka</groupId>
+      <artifactId>kafka-junit</artifactId>
+      <version>${net.mguenther.kafka.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
-
   <build>
     <plugins>
       <plugin>

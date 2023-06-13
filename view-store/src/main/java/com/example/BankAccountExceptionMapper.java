@@ -1,32 +1,22 @@
 package com.example;
 
-import com.example.exception.ExceptionResponseDTO;
-import com.example.exception.InsufficientFundsException;
-import com.example.store.exception.BankAccountNotFoundException;
+import com.example.exception.BankAccountNotFoundException;
+import com.example.dto.ExceptionResponseDTO;
 import com.fasterxml.jackson.core.JsonParseException;
+import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.ws.rs.InternalServerErrorException;
-import jakarta.ws.rs.core.Response;
 import java.time.LocalDateTime;
 
-@ApplicationScoped
 public class BankAccountExceptionMapper {
 
     private final static Logger logger = Logger.getLogger(BankAccountExceptionMapper.class);
 
     @ServerExceptionMapper(priority = 1)
-    public RestResponse<ExceptionResponseDTO> mapInsufficientFundsException(InsufficientFundsException ex) {
-        final var response = new ExceptionResponseDTO(ex.getMessage(), Response.Status.BAD_REQUEST.getStatusCode(), LocalDateTime.now());
-        logger.errorv(ex, "(mapInsufficientFundsException) response: {0}", response);
-        return RestResponse.status(Response.Status.BAD_REQUEST, response);
-    }
-
-    @ServerExceptionMapper(priority = 2)
     public RestResponse<ExceptionResponseDTO> mapBankAccountNotFoundException(BankAccountNotFoundException ex) {
         final var response = new ExceptionResponseDTO(ex.getMessage(), Response.Status.NOT_FOUND.getStatusCode(), LocalDateTime.now());
         logger.errorv(ex, "(mapBankAccountNotFoundException) response: {0}", response);
@@ -45,23 +35,17 @@ public class BankAccountExceptionMapper {
         throw ex;
     }
 
-    @ServerExceptionMapper(priority = 4)
+    @ServerExceptionMapper(priority = 2)
     public RestResponse<ExceptionResponseDTO> mapInternalServerErrorException(InternalServerErrorException ex) {
         final var response = new ExceptionResponseDTO(ex.getMessage(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), LocalDateTime.now());
         logger.errorv(ex, "(mapInternalServerErrorException) response: {0}", response);
         return RestResponse.status(Response.Status.INTERNAL_SERVER_ERROR, response);
     }
 
-    @ServerExceptionMapper(priority = 5)
-    public RestResponse<ExceptionResponseDTO> mapRuntimeException(RuntimeException ex) {
+    @ServerExceptionMapper(priority = 3)
+    public RestResponse<ExceptionResponseDTO> mapRuntimeExceptionException(RuntimeException ex) {
         final var response = new ExceptionResponseDTO(ex.getMessage(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), LocalDateTime.now());
         logger.errorv(ex, "(mapRuntimeExceptionException) response: {0}", response);
         return RestResponse.status(Response.Status.INTERNAL_SERVER_ERROR, response);
     }
-
-
-
-
-
-
 }

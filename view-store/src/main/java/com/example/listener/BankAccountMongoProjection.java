@@ -1,7 +1,7 @@
 package com.example.listener;
 
 import com.example.domain.BankAccountDocument;
-import com.example.events.*;
+import com.example.event.*;
 import com.example.exception.InvalidEventTypeException;
 import com.example.repository.BankAccountMongoRepository;
 import com.example.util.SerializerUtils;
@@ -33,6 +33,7 @@ public class BankAccountMongoProjection implements Projection {
                     .onItem().invoke(message::ack)
                     .onFailure().invoke(ex -> logger.error("(process) msg ack exception", ex));
 
+        // TODO why does this not process multiple events?
         return Multi.createFrom().iterable(List.of(events))
                 .onItem().call(this::when)
                 .toUni().replaceWithVoid()

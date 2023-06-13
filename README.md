@@ -47,6 +47,13 @@ You can then execute your native executable with: `./target/event-sourcing-1.0.0
 
 If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.
 
+# Testing the Native image
+
+To test the native image, run the integration tests against the generated binary:
+```shell
+./mvnw verify -Pnative
+```
+
 ## Related Guides
 
 - SmallRye Fault Tolerance ([guide](https://quarkus.io/guides/microprofile-fault-tolerance)): Build fault-tolerant network services
@@ -93,7 +100,7 @@ curl -v -X POST -H "Content-Type: application/json" -d '{"amount": 100.00}' loca
 curl -v "localhost:9010/api/v1/bank/balance?page=0&size=3"
 ```
 
-### Get bank account by Id
+### Get bank account by ID
 ```shell
 curl -v "localhost:9010/api/v1/bank/$ID"
 ```
@@ -116,6 +123,22 @@ docker-compose exec kafka /kafka/bin/kafka-console-consumer.sh \
     --from-beginning \
     --property print.key=true \
     --topic quarkus-db-server.public.customers
+```
+
+# Native Image
+## Building
+Docker containers are generated using the native binary because of the `quarkus-container-image-jib` dependency and by adding the following properties to the application:
+- `quarkus.container-image.build`
+- `quarkus.native.container-build`
+_Note:_ If you want the container to use a non-native image, then set the `quarkus.native.container-build` to `false`.
+```shell
+mvn package -DskipTests -Pnative
+```
+
+## Testing
+Integration tests are used to make sure that the application functions correct once it has been converted to a native application.
+```shell
+./mvnw clean verify -Pnative
 ```
 
 # Production mode
