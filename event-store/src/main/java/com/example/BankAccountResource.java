@@ -3,6 +3,7 @@ package com.example;
 import com.example.commands.*;
 import com.example.dto.*;
 import io.smallrye.mutiny.Uni;
+import jakarta.validation.constraints.NotNull;
 import org.jboss.logging.Logger;
 
 import jakarta.inject.Inject;
@@ -22,7 +23,7 @@ public class BankAccountResource {
     BankAccountCommandService commandService;
 
     @POST
-    public Uni<Response> createBankAccount(@Valid CreateBankAccountRequestDTO dto) {
+    public Uni<Response> createBankAccount(@NotNull @Valid CreateBankAccountRequestDTO dto) {
         final var command = new CreateBankAccountCommand(dto.email(), dto.userName(), dto.address());
         logger.infof("CreateBankAccountCommand: %s", command);
         return commandService.handle(command)
@@ -31,7 +32,7 @@ public class BankAccountResource {
 
     @POST
     @Path("/email/{aggregateID}")
-    public Uni<Response> changeEmail(@PathParam("aggregateID") String aggregateID, @Valid ChangeEmailRequestDTO dto) {
+    public Uni<Response> changeEmail(@PathParam("aggregateID") String aggregateID, @NotNull @Valid ChangeEmailRequestDTO dto) {
         final var command = new ChangeEmailCommand(aggregateID, dto.email());
         logger.infof("ChangeEmailCommand: %s", command);
         return commandService.handle(command)
@@ -40,7 +41,7 @@ public class BankAccountResource {
 
     @POST
     @Path("/address/{aggregateID}")
-    public Uni<Response> changeAddress(@PathParam("aggregateID") String aggregateID, @Valid ChangeAddressRequestDTO dto) {
+    public Uni<Response> changeAddress(@PathParam("aggregateID") String aggregateID, @NotNull @Valid ChangeAddressRequestDTO dto) {
         final var command = new ChangeAddressCommand(aggregateID, dto.address());
         logger.infof("ChangeAddressCommand: %s", command);
         return commandService.handle(command)
@@ -49,7 +50,7 @@ public class BankAccountResource {
 
     @POST
     @Path("/deposit/{aggregateID}")
-    public Uni<Response> depositAmount(@PathParam("aggregateID") String aggregateID, @Valid DepositAmountRequestDTO dto) {
+    public Uni<Response> depositAmount(@PathParam("aggregateID") String aggregateID, @NotNull @Valid DepositAmountRequestDTO dto) {
         final var command = new DepositAmountCommand(aggregateID, dto.amount());
         logger.infof("DepositAmountCommand: %s", command);
         return commandService.handle(command)
@@ -58,7 +59,7 @@ public class BankAccountResource {
 
     @POST
     @Path("/withdraw/{aggregateID}")
-    public Uni<Response> withdrawAmount(@PathParam("aggregateID") String aggregateID, @Valid WithdrawAmountRequestDTO dto) {
+    public Uni<Response> withdrawAmount(@PathParam("aggregateID") String aggregateID, @NotNull @Valid WithdrawAmountRequestDTO dto) {
         final var command = new WithdrawAmountCommand(aggregateID, dto.amount());
         logger.infof("WithdrawAmountCommand: %s", command);
         return commandService.handle(command)
