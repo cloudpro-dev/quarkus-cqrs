@@ -218,18 +218,16 @@ Logs received by Logstash will be exported to Loki for ingestion and storage.
 
 To query the logs in Loki:
 ```shell
-curl -G -s  "http://localhost:3100/loki/api/v1/query_range" --data-urlencode 'query={traceId="28f7a6654a7a213eff0b4ec4f52275d9"}' | jq
+curl -G -s  "http://localhost:3100/loki/api/v1/query_range" --data-urlencode 'query={traceId="978fab8a10b12fffec43e78b43e44936"}' | jq
 ```
 
 # Exemplars
 
-Quarkus supports Exemplars (metrics with an associated traceId and spanId) via Prometheus using the standard `quarkus-micrometer-prometheus` extension.
+Quarkus supports Exemplars (metrics with an associated `traceId` and `spanId`) via Prometheus using the standard `quarkus-micrometer-prometheus` extension.
 
-By adding the `@Timed` or `@Counter` annotation to your methods, you will see that Prometheus metrics will contain the extra information.
+By adding the `@Timed` annotation to your methods, you will see that Prometheus metrics will contain the extra information.
 ```shell
 curl -v http://localhost:9010/q/metrics | grep hello
-hello_world_timer_seconds_bucket{class="com.example.BankAccountResource",exception="none",method="getAllByBalance",le="0.016777216"} 2.0 # {span_id="d1f2591c877b95b9",trace_id="08c32eb410514f827454363c63fc1ebb"} 0.016702041 1684067985.642
-hello_world_counter_total{class="com.example.BankAccountResource",exception="none",method="getAllByBalance",result="success"} 2.0 # {span_id="d1f2591c877b95b9",trace_id="08c32eb410514f827454363c63fc1ebb"} 1.0 1684067985.638
+view_store_message_process_seconds_bucket{class="com.example.BankAccountResource",exception="none",method="getAllByBalance",le="0.016777216"} 2.0 # {span_id="d1f2591c877b95b9",trace_id="08c32eb410514f827454363c63fc1ebb"} 0.016702041 1684067985.642
 ```
 _Note: Not every entry will have traceId and spanId as Exemplars are sampled data, not all the data._
-`

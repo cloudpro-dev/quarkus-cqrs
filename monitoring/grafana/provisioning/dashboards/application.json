@@ -125,7 +125,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "histogram_quantile(0.99, sum(rate(traces_spanmetrics_latency_bucket[1m0s])) by (le))"
+              "options": "histogram_quantile(0.99, sum(rate(traces_spanmetrics_latency_bucket{service=~\"event-store\"}[1m0s])) by (le))"
             },
             "properties": [
               {
@@ -137,7 +137,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket[1m0s])) by (le))"
+              "options": "histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket{service=~\"event-store\"}[1m0s])) by (le))"
             },
             "properties": [
               {
@@ -162,7 +162,7 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 7,
+        "w": 15,
         "x": 8,
         "y": 1
       },
@@ -186,7 +186,7 @@
             "uid": "e4e0224e-c538-4ae6-9468-dbcdb40209c0"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.99, sum(rate(traces_spanmetrics_latency_bucket[$__rate_interval])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(rate(traces_spanmetrics_latency_bucket{service=~\"$service\"}[$__rate_interval])) by (le))",
           "instant": true,
           "key": "Q-f16678c6-b07e-4cb8-b9a1-6b3aab5ba38d-0",
           "legendFormat": "__auto",
@@ -199,7 +199,7 @@
             "uid": "e4e0224e-c538-4ae6-9468-dbcdb40209c0"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket[$__rate_interval])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket{service=~\"$service\"}[$__rate_interval])) by (le))",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
@@ -319,7 +319,7 @@
             "uid": "e4e0224e-c538-4ae6-9468-dbcdb40209c0"
           },
           "editorMode": "code",
-          "expr": "sum(rate(http_server_requests_seconds_count{instance=~\"$instance\"}[$__rate_interval]))",
+          "expr": "sum(rate(http_server_requests_seconds_count{instance=~\"$instance\",job=\"$service\"}[$__rate_interval]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -388,7 +388,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "sum(rate(http_server_requests_seconds_sum{instance=~\"host.docker.internal:9020\", status!~\"5..\"}[2m]))/sum(rate(http_server_requests_seconds_count{instance=~\"host.docker.internal:9020\", status!~\"5..\"}[2m]))"
+              "options": "sum(rate(http_server_requests_seconds_sum{instance=~\"(host\\\\.docker\\\\.internal:9010|host\\\\.docker\\\\.internal:9020)\", job=\"event-store\", status!~\"5..\"}[1m0s]))/sum(rate(http_server_requests_seconds_count{instance=~\"(host\\\\.docker\\\\.internal:9010|host\\\\.docker\\\\.internal:9020)\", status!~\"5..\"}[1m0s]))"
             },
             "properties": [
               {
@@ -400,7 +400,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "max(http_server_requests_seconds_max{instance=~\"host.docker.internal:9020\", status!~\"5..\"})"
+              "options": "max(http_server_requests_seconds_max{instance=~\"(host\\\\.docker\\\\.internal:9010|host\\\\.docker\\\\.internal:9020)\", job=\"event-store\", status!~\"5..\"})"
             },
             "properties": [
               {
@@ -437,7 +437,7 @@
             "uid": "e4e0224e-c538-4ae6-9468-dbcdb40209c0"
           },
           "editorMode": "code",
-          "expr": "sum(rate(http_server_requests_seconds_sum{instance=~\"$instance\", status!~\"5..\"}[$__rate_interval]))/sum(rate(http_server_requests_seconds_count{instance=~\"$instance\", status!~\"5..\"}[$__rate_interval]))",
+          "expr": "sum(rate(http_server_requests_seconds_sum{instance=~\"$instance\", job=\"$service\", status!~\"5..\"}[$__rate_interval]))/sum(rate(http_server_requests_seconds_count{instance=~\"$instance\", status!~\"5..\"}[$__rate_interval]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -448,7 +448,7 @@
             "uid": "e4e0224e-c538-4ae6-9468-dbcdb40209c0"
           },
           "editorMode": "code",
-          "expr": "max(http_server_requests_seconds_max{instance=~\"$instance\", status!~\"5..\"})",
+          "expr": "max(http_server_requests_seconds_max{instance=~\"$instance\", job=\"$service\", status!~\"5..\"})",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
@@ -543,7 +543,7 @@
             "uid": "e4e0224e-c538-4ae6-9468-dbcdb40209c0"
           },
           "editorMode": "code",
-          "expr": "sum(rate(http_server_requests_seconds_count{instance=~\"$instance\", status=~\"5..\"}[$__rate_interval]))",
+          "expr": "sum(rate(http_server_requests_seconds_count{instance=~\"$instance\", job=\"$service\", status=~\"5..\"}[$__rate_interval]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -710,7 +710,7 @@
             "uid": "e4e0224e-c538-4ae6-9468-dbcdb40209c0"
           },
           "editorMode": "code",
-          "expr": "rate(http_server_requests_seconds_count{instance=~\"$instance\"}[$__rate_interval])",
+          "expr": "rate(http_server_requests_seconds_count{instance=~\"$instance\", job=\"$service\"}[$__rate_interval])",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -865,7 +865,7 @@
             "uid": "e4e0224e-c538-4ae6-9468-dbcdb40209c0"
           },
           "editorMode": "code",
-          "expr": "rate(http_server_requests_seconds_sum{instance=~\"$instance\"}[$__rate_interval]) / rate(http_server_requests_seconds_count{instance=~\"$instance\"}[$__rate_interval])",
+          "expr": "rate(http_server_requests_seconds_sum{instance=~\"$instance\", job=\"$service\"}[$__rate_interval]) / rate(http_server_requests_seconds_count{instance=~\"$instance\", job=\"$service\"}[$__rate_interval])",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1019,7 +1019,7 @@
             "uid": "e4e0224e-c538-4ae6-9468-dbcdb40209c0"
           },
           "editorMode": "code",
-          "expr": "rate(http_server_requests_seconds_sum{instance=~\"$instance\"}[$__rate_interval])",
+          "expr": "rate(http_server_requests_seconds_sum{instance=~\"$instance\", job=\"$service\"}[$__rate_interval])",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1176,7 +1176,7 @@
             "uid": "e4e0224e-c538-4ae6-9468-dbcdb40209c0"
           },
           "editorMode": "code",
-          "expr": "http_server_requests_seconds_max{instance=~\"$instance\"}",
+          "expr": "http_server_requests_seconds_max{instance=~\"$instance\", job=\"$service\"}",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1257,7 +1257,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "{client_id=\"kafka-consumer-event-store\", instance=\"host.docker.internal:9010\", job=\"view-store\", kafka_version=\"3.4.0\"}"
+              "options": "{client_id=\"kafka-consumer-event-store\", instance=\"host.docker.internal:9010\", job=\"view-store\", kafka_version=\"unknown\"}"
             },
             "properties": [
               {
@@ -1269,7 +1269,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "{client_id=\"kafka-producer-event-store\", instance=\"host.docker.internal:9020\", job=\"event-store\", kafka_version=\"3.4.0\"}"
+              "options": "{client_id=\"kafka-producer-event-store\", instance=\"host.docker.internal:9020\", job=\"event-store\", kafka_version=\"unknown\"}"
             },
             "properties": [
               {
@@ -1388,7 +1388,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "{__name__=\"kafka_producer_topic_record_retry_rate\", client_id=\"kafka-producer-event-store\", instance=\"host.docker.internal:9020\", job=\"event-store\", kafka_version=\"3.4.0\", topic=\"event-store\"}"
+              "options": "{__name__=\"kafka_producer_topic_record_retry_rate\", client_id=\"kafka-producer-event-store\", instance=\"host.docker.internal:9020\", job=\"event-store\", kafka_version=\"unknown\", topic=\"event-store\"}"
             },
             "properties": [
               {
@@ -1407,7 +1407,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "{__name__=\"kafka_producer_topic_record_error_rate\", client_id=\"kafka-producer-event-store\", instance=\"host.docker.internal:9020\", job=\"event-store\", kafka_version=\"3.4.0\", topic=\"event-store\"}"
+              "options": "{__name__=\"kafka_producer_topic_record_error_rate\", client_id=\"kafka-producer-event-store\", instance=\"host.docker.internal:9020\", job=\"event-store\", kafka_version=\"unknown\", topic=\"event-store\"}"
             },
             "properties": [
               {
@@ -1533,7 +1533,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "{__name__=\"kafka_producer_node_request_latency_avg\", client_id=\"kafka-producer-event-store\", instance=\"host.docker.internal:9020\", job=\"event-store\", kafka_version=\"3.4.0\", node_id=\"node-1\"}"
+              "options": "{__name__=\"kafka_producer_node_request_latency_avg\", client_id=\"kafka-producer-event-store\", instance=\"host.docker.internal:9020\", job=\"event-store\", kafka_version=\"unknown\", node_id=\"node-1\"}"
             },
             "properties": [
               {
@@ -1545,7 +1545,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "{__name__=\"kafka_producer_node_request_latency_max\", client_id=\"kafka-producer-event-store\", instance=\"host.docker.internal:9020\", job=\"event-store\", kafka_version=\"3.4.0\", node_id=\"node-1\"}"
+              "options": "{__name__=\"kafka_producer_node_request_latency_max\", client_id=\"kafka-producer-event-store\", instance=\"host.docker.internal:9020\", job=\"event-store\", kafka_version=\"unknown\", node_id=\"node-1\"}"
             },
             "properties": [
               {
@@ -1582,7 +1582,7 @@
             "uid": "e4e0224e-c538-4ae6-9468-dbcdb40209c0"
           },
           "editorMode": "code",
-          "expr": "kafka_producer_node_request_latency_avg{node_id=\"node-1\"}",
+          "expr": "kafka_producer_node_request_latency_avg{job=\"event-store\", node_id!~\"node--1\"}",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1593,7 +1593,7 @@
             "uid": "e4e0224e-c538-4ae6-9468-dbcdb40209c0"
           },
           "editorMode": "code",
-          "expr": "kafka_producer_node_request_latency_max{node_id=\"node-1\"}",
+          "expr": "kafka_producer_node_request_latency_max{job=\"event-store\", node_id!~\"node--1\"}",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
@@ -1663,7 +1663,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "histogram_quantile(0.99, sum(rate(view_store_message_process_seconds_bucket{instance=\"host.docker.internal:9010\"}[1m0s])) by (le))"
+              "options": "histogram_quantile(0.99, sum(rate(view_store_message_process_seconds_bucket{instance=~\"(host\\\\.docker\\\\.internal:9010|host\\\\.docker\\\\.internal:9020)\", job=\"view-store\"}[1m0s])) by (le))"
             },
             "properties": [
               {
@@ -1675,7 +1675,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "histogram_quantile(0.95, sum(rate(view_store_message_process_seconds_bucket{instance=\"host.docker.internal:9010\"}[1m0s])) by (le))"
+              "options": "histogram_quantile(0.95, sum(rate(view_store_message_process_seconds_bucket{instance=~\"(host\\\\.docker\\\\.internal:9010|host\\\\.docker\\\\.internal:9020)\"}[1m0s])) by (le))"
             },
             "properties": [
               {
@@ -1687,7 +1687,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "histogram_quantile(0.90, sum(rate(view_store_message_process_seconds_bucket{instance=\"host.docker.internal:9010\"}[1m0s])) by (le))"
+              "options": "histogram_quantile(0.90, sum(rate(view_store_message_process_seconds_bucket{instance=~\"(host\\\\.docker\\\\.internal:9010|host\\\\.docker\\\\.internal:9020)\"}[1m0s])) by (le))"
             },
             "properties": [
               {
@@ -1725,7 +1725,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "histogram_quantile(0.99, sum(rate(view_store_message_process_seconds_bucket{instance=\"$instance\"}[$__rate_interval])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(rate(view_store_message_process_seconds_bucket{instance=~\"$instance\", job=\"view-store\"}[$__rate_interval])) by (le))",
           "instant": true,
           "key": "Q-a6c49320-213a-4665-ae70-e27995fdb785-0",
           "legendFormat": "__auto",
@@ -1738,7 +1738,7 @@
             "uid": "e4e0224e-c538-4ae6-9468-dbcdb40209c0"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum(rate(view_store_message_process_seconds_bucket{instance=\"$instance\"}[$__rate_interval])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(view_store_message_process_seconds_bucket{instance=~\"$instance\"}[$__rate_interval])) by (le))",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
@@ -1750,7 +1750,7 @@
             "uid": "e4e0224e-c538-4ae6-9468-dbcdb40209c0"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.90, sum(rate(view_store_message_process_seconds_bucket{instance=\"$instance\"}[$__rate_interval])) by (le))",
+          "expr": "histogram_quantile(0.90, sum(rate(view_store_message_process_seconds_bucket{instance=~\"$instance\"}[$__rate_interval])) by (le))",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
@@ -1833,7 +1833,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "sum(rate(postgresql_processing_seconds_sum{}[2m]))/sum(rate(postgresql_processing_seconds_count{}[2m]))"
+              "options": "sum(rate(postgresql_processing_seconds_sum{}[1m0s]))/sum(rate(postgresql_processing_seconds_count{}[1m0s]))"
             },
             "properties": [
               {
@@ -1965,7 +1965,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "sum(rate(postgresql_queue_delay_seconds_sum{}[2m])) / sum(rate(postgresql_queue_delay_seconds_count{}[2m]))"
+              "options": "sum(rate(postgresql_queue_delay_seconds_sum{}[1m0s])) / sum(rate(postgresql_queue_delay_seconds_count{}[1m0s]))"
             },
             "properties": [
               {
@@ -2042,7 +2042,7 @@
       "type": "timeseries"
     }
   ],
-  "refresh": "5s",
+  "refresh": false,
   "schemaVersion": 38,
   "style": "dark",
   "tags": [],
@@ -2051,8 +2051,8 @@
       {
         "current": {
           "selected": true,
-          "text": "host.docker.internal:9010",
-          "value": "host.docker.internal:9010"
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": {
           "type": "prometheus",
@@ -2060,12 +2060,39 @@
         },
         "definition": "label_values(instance)",
         "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "multi": false,
         "name": "instance",
         "options": [],
         "query": {
           "query": "label_values(instance)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "view-store",
+          "value": "view-store"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "e4e0224e-c538-4ae6-9468-dbcdb40209c0"
+        },
+        "definition": "label_values(service)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "service",
+        "multi": false,
+        "name": "service",
+        "options": [],
+        "query": {
+          "query": "label_values(service)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,

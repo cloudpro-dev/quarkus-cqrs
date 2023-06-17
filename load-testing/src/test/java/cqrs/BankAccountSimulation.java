@@ -138,14 +138,14 @@ public class BankAccountSimulation extends Simulation {
             // commands.injectOpen(smokeTest),
             // queries.injectOpen(smokeTest)
 
-            commands.injectOpen(InjectionProfile.stepWiseProfile(10.0, 1.0, 150L, 12)),
-            queries.injectOpen(InjectionProfile.stepWiseProfile(10.0, 3.0, 150L, 12))
+            // commands.injectOpen(InjectionProfile.stepWiseProfile(10.0, 1.0, 150L, 12)),
+            // queries.injectOpen(InjectionProfile.stepWiseProfile(10.0, 3.0, 150L, 12))
 
             // commands.injectOpen(spikeTest),
             // queries.injectOpen(spikeTest)
 
-            // commands.injectOpen(constantUsersPerSec(10.0).during(300)),
-            // queries.injectOpen(constantUsersPerSec(10.0).during(300))
+            commands.injectOpen(constantUsersPerSec(15.0).during(30)),
+            queries.injectOpen(constantUsersPerSec(20.0).during(30))
         ).protocols(protocol);
     }
 
