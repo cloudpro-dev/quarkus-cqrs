@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: view-store
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: view-store
+  template:
+    metadata:
+      labels:
+        app: view-store
+    spec:
+      containers:
+        - name: view-store
+          image: quarkus-cqrs/view-store:1.0.0-SNAPSHOT
+          ports:
+            - containerPort: 9020
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: BROKER://kafka-svc.cqrs.svc.cluster.local:9093
+            - name: QUARKUS_HTTP_PORT
+              value: "9010"
+            - name: QUARKUS_HTTP_SSL_PORT
+              value: "9011"
+            - name: QUARKUS_MONGODB_CONNECTION_STRING
+              value: mongodb://mongo:27017
+            - name: QUARKUS_MONGODB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-config
+                  key: database
+            - name: QUARKUS_MONGODB_CREDENTIALS_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: username
+            - name: QUARKUS_MONGODB_CREDENTIALS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: password
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: view-store
+spec:
+  type: NodePort
+  ports:
+    - port: 9010
+      protocol: TCP
+      targetPort: 9010
+      name: http
+  selector:
+    app: view-store

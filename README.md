@@ -144,4 +144,58 @@ Integration tests are used to make sure that the application functions correct o
 # Production mode
 To run in `prod` profile from your IDE, you will need to add a VM Options for `-Dquarkus.profile=prod`
 
+# Kubernetes
+
+```shell
+kubectl create ns cqrs
+```
+
+```shell
+kubectl apply -f ./kubernetes/postgres.yml -n cqrs
+kubectl apply -f ./kubernetes/mongo.yml -n cqrs
+kubectl apply -f ./kubernetes/kafka.yml -n cqrs
+```
+
+
+Kafka client can be run to perform activities on the Kafka instances
+```shell
+kubectl run kafka-client -n cqrs --rm -ti --image bitnami/kafka:3.1.0 -- bash
+
+ls /opt/bitnami/kafka/bin
+kafka-acls.sh
+kafka-broker-api-versions.sh
+kafka-cluster.sh
+kafka-configs.sh
+kafka-console-consumer.sh
+kafka-console-producer.sh
+kafka-consumer-groups.sh
+kafka-consumer-perf-test.sh
+kafka-delegation-tokens.sh
+kafka-delete-records.sh
+```
+
+# Passwords
+
+Kubernetes stores the content of all secrets in a base 64 encoded format. If you want to see how your string will appear in a base64 format, execute the following.
+```shell
+echo "devopscube" | base64 
+//after encoding it, this becomes ZGV2b3BzY3ViZQo=
+```
+
+If you want to decode a base64 string. Run
+```shell
+echo "ZGV2b3BzY3ViZQo=" | base64 --decode
+//after decoding it, this will give devopscube
+```
+
+## Application deployment
+
+### Build and push container images
+
+Run `eval $(minikube -p minikube docker-env)` to ensure we use the Docker daemon inside Minikube.
+
+```shell
+eval $(minikube -p minikube docker-env)
+mvn clean package
+```
 
