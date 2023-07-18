@@ -63,88 +63,44 @@ To test the native image, run the integration tests against the generated binary
 - JDBC Driver - PostgreSQL ([guide](https://quarkus.io/guides/datasource)): Connect to the PostgreSQL database via JDBC
 - Reactive PostgreSQL client ([guide](https://quarkus.io/guides/reactive-sql-clients)): Connect to the PostgreSQL database using the reactive pattern
 
-# Application
 
-## Commands
-
-### Create a new bank account
-```shell
-ID=$(curl -s -X POST -H "Content-Type: application/json" -d '{"email":"test@test.com", "userName":"testuser12345", "address":"11 Test Lane, Test Town, TT1 1TT"}' localhost:9020/api/v1/bank) 
-echo "$ID"
-```
-
-### Update email address
-```shell
-curl -v -X POST -H "Content-Type: application/json" -d '{"email":"test123@test.com"}' localhost:9020/api/v1/bank/email/$ID
-```
-
-### Update address
-```shell
-curl -v -X POST -H "Content-Type: application/json" -d '{"address":"64 Test Ave, Testington, 1TT TT1"}' localhost:9020/api/v1/bank/address/$ID
-```
-
-### Deposit funds
-```shell
-curl -v -X POST -H "Content-Type: application/json" -d '{"amount": 500.00}' localhost:9020/api/v1/bank/deposit/$ID
-```
-
-### Withdraw funds
-```shell
-curl -v -X POST -H "Content-Type: application/json" -d '{"amount": 100.00}' localhost:9020/api/v1/bank/withdraw/$ID
-```
-
-## Queries
-
-### Find all sorted by balance
-```shell
-curl -v "localhost:9010/api/v1/bank/balance?page=0&size=3"
-```
-
-### Get bank account by ID
-```shell
-curl -v "localhost:9010/api/v1/bank/$ID"
-```
 
 # Docker deployment
 
 To run the application using a local Docker setup instead of Development mode, you can run the `docker-compose.yml` file in the project root directory.
+
+This will package the application as a Docker image and then run the whole stack:
 ```shell
-docker-compose -f docker-compose.yml up -d
-```
-Run the `event-store` application
-```shell
-mvn package
-java -jar target/quarkus-app/quarkus-run.jar
+mvn clean package \
+  -DskipTests \
+  -Dquarkus.container-image.build=true \
+  -Dquarkus.container-image.group=cqrs
+  
+docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d
 ```
 
+If you wish to deploy only the infrastructure on Docker and then connect with local instance of the application for debugging.
 ```shell
-docker-compose exec kafka /kafka/bin/kafka-console-consumer.sh \
-    --bootstrap-server kafka:9092 \
-    --from-beginning \
-    --property print.key=true \
-    --topic quarkus-db-server.public.customers
-```
+mvn clean package \
+  -DskipTests \
+  -Dquarkus.container-image.build=true \
+  -Dquarkus.container-image.group=cqrs \
+  -Dquarkus.container-image.group=cqrs
 
-# Native Image
-## Building
-Docker containers are generated using the native binary because of the `quarkus-container-image-jib` dependency and by adding the following properties to the application:
-- `quarkus.container-image.build`
-- `quarkus.native.container-build`
-_Note:_ If you want the container to use a non-native image, then set the `quarkus.native.container-build` to `false`.
-```shell
-mvn package -DskipTests -Pnative
-```
-
-## Testing
-Integration tests are used to make sure that the application functions correct once it has been converted to a native application.
-```shell
-./mvnw clean verify -Pnative
+      - QUARKUS_HTTP_PORT=9020
+      - QUARKUS_HTTP_SSL_PORT=9021
+      - QUARKUS_DATASOURCE_USERNAME=postgres
+      - QUARKUS_DATASOURCE_PASSWORD=postgres
+      - KAFKA_BOOTSTRAP_SERVERS=BROKER://localhost:9092
+      - QUARKUS_DATASOURCE_DB_KIND=postgresql
+      - QUARKUS_DATASOURCE_REACTIVE_URL=vertx-reactive:postgresql://localhost:5432/microservices
+      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://localhost:5432/microservices
 ```
 
 # Production mode
 To run in `prod` profile from your IDE, you will need to add a VM Options for `-Dquarkus.profile=prod`
 
-# Kubernetes
+# Deploying the application in Kubernetes
 
 ```shell
 kubectl create ns cqrs
@@ -155,7 +111,6 @@ kubectl apply -f ./kubernetes/postgres.yml -n cqrs
 kubectl apply -f ./kubernetes/mongo.yml -n cqrs
 kubectl apply -f ./kubernetes/kafka.yml -n cqrs
 ```
-
 
 Kafka client can be run to perform activities on the Kafka instances
 ```shell
@@ -174,7 +129,33 @@ kafka-delegation-tokens.sh
 kafka-delete-records.sh
 ```
 
-# Passwords
+**Important:** We must build the image via the Minikube Docker Daemon to make it available to the Kubernetes cluster for deployment:
+```
+eval $(minikube -p minikube docker-env)
+```
+
+### Standard JAR build
+
+```
+./mvnw clean package \
+    -DskipTests=true \
+    -Dquarkus.container-image.build=true \
+    -Dquarkus.container-image.group=cqrs \
+    -Dquarkus.kubernetes.deploy=true
+```
+
+### Native image build
+```
+./mvnw clean package \
+    -DskipTests=true \
+    -Dnative \
+    -Dquarkus.container-image.build=true \
+    -Dquarkus.container-image.group=cqrs \
+    -Dquarkus.native.remote-container-build=true \
+    -Dquarkus.kubernetes.deploy=true
+```
+
+# Password encryption
 
 Kubernetes stores the content of all secrets in a base 64 encoded format. If you want to see how your string will appear in a base64 format, execute the following.
 ```shell
@@ -188,14 +169,61 @@ echo "ZGV2b3BzY3ViZQo=" | base64 --decode
 //after decoding it, this will give devopscube
 ```
 
-## Application deployment
+# Application
 
-### Build and push container images
+## Testing
 
-Run `eval $(minikube -p minikube docker-env)` to ensure we use the Docker daemon inside Minikube.
-
+# 
+To test the standard JAR version of the application you can run the standard integration tests:
 ```shell
-eval $(minikube -p minikube docker-env)
-mvn clean package
+./mvnw clean verify
 ```
 
+# Native image testing
+Integration tests are used to make sure that the application functions correct once it has been converted to a native application.
+```shell
+./mvnw clean verify -Pnative
+```
+
+## Commands
+You can manually call the application API to create a new account and perform some actions.
+
+### Create a new bank account
+```shell
+EVENT_STORE_URL=$(minikube service --url --https event-store -n cqrs | head -n 1)
+VIEW_STORE_URL=$(minikube service --url view-store -n cqrs | head -n 1)
+ID=$(curl -s -X POST -H "Content-Type: application/json" -d '{"email":"test@test.com", "userName":"testuser12345", "address":"11 Test Lane, Test Town, TT1 1TT"}' $EVENT_STORE_URL/api/v1/bank) 
+echo "$ID"
+```
+
+### Update email address
+```shell
+curl -v -X POST -H "Content-Type: application/json" -d '{"email":"test123@test.com"}' $EVENT_STORE_URL/api/v1/bank/email/$ID
+```
+
+### Update address
+```shell
+curl -v -X POST -H "Content-Type: application/json" -d '{"address":"64 Test Ave, Testington, 1TT TT1"}' $EVENT_STORE_URL/api/v1/bank/address/$ID
+```
+
+### Deposit funds
+```shell
+curl -v -X POST -H "Content-Type: application/json" -d '{"amount": 500.00}' $EVENT_STORE_URL/api/v1/bank/deposit/$ID
+```
+
+### Withdraw funds
+```shell
+curl -v -X POST -H "Content-Type: application/json" -d '{"amount": 100.00}' $EVENT_STORE_URL/api/v1/bank/withdraw/$ID
+```
+
+## Queries
+
+### Find all sorted by balance
+```shell
+curl -v "$VIEW_STORE_URL/api/v1/bank/balance?page=0&size=3"
+```
+
+### Get bank account by ID
+```shell
+curl -v "$VIEW_STORE_URL/api/v1/bank/$ID"
+```
