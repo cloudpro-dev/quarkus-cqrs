@@ -9,6 +9,7 @@
   <modules>
     <module>event-store</module>
     <module>view-store</module>
+      <module>event-streams</module>
   </modules>
   <properties>
     <compiler-plugin.version>3.10.1</compiler-plugin.version>

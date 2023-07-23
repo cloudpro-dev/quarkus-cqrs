@@ -145,3 +145,8 @@ Integration tests are used to make sure that the application functions correct o
 To run in `prod` profile from your IDE, you will need to add a VM Options for `-Dquarkus.profile=prod`
 
 
+# Kafka Streams
+Processing of the event emitted from the `event-store` Kafka topic are aggregated by `event-streams` into a new Kafka 
+topic `event-store-aggregated` which is then consumed by other applications.
+
+

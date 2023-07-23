@@ -44,6 +44,19 @@ services:
           memory: 300m
           cpus: '10.0'
 
+  event-streams:
+    image: quarkus-cqrs/event-streams:1.0.0-SNAPSHOT
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=BROKER://kafka:9092
+      - KAFKA_STREAMS_STATE_DIR=/opt
+    networks:
+      - cqrs
+    deploy:
+      resources:
+        limits:
+          memory: 300m
+          cpus: '10.0'
+
 networks:
   cqrs:
     driver: bridge
