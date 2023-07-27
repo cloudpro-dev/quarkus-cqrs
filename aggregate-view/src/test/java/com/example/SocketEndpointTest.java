@@ -16,7 +16,6 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
 @QuarkusTest
-@QuarkusTestResource(KafkaResource.class)
 public class SocketEndpointTest {
 
     private static final LinkedBlockingDeque<String> MESSAGES = new LinkedBlockingDeque<>();
@@ -28,7 +27,7 @@ public class SocketEndpointTest {
 
     @Test
     public void testWebsocket() throws Exception {
-        ExternalKafkaCluster kafka = ExternalKafkaCluster.at(KafkaResource.getBootstrapServers());
+        ExternalKafkaCluster kafka = ExternalKafkaCluster.at("localhost:29092");
 
         String payload = "{\"accountTotal\":20,\"countDeposits\":15,\"countWithdrawals\":9,\"avgDeposit\":500.00," +
                 "\"avgWithdrawal\":100.00,\"avgBalance\":471.43,\"totalDeposits\":7500.00,\"totalWithdrawals\":900.00}";
