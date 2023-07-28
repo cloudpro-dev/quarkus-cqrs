@@ -39,7 +39,7 @@ public class BankAccountResourceTest {
 
     @Test
     public void testAggregateEvents() throws InterruptedException {
-        ExternalKafkaCluster kafka = ExternalKafkaCluster.at("localhost:9098"); // fixed port in config
+        ExternalKafkaCluster kafka = ExternalKafkaCluster.at("localhost:29098"); // fixed port in config
 
         Event createEvent = accountCreateEvent();
         Event depositEvent = accountDepositEvent(createEvent);

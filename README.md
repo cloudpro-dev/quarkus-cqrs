@@ -227,3 +227,13 @@ curl -v "$VIEW_STORE_URL/api/v1/bank/balance?page=0&size=3"
 ```shell
 curl -v "$VIEW_STORE_URL/api/v1/bank/$ID"
 ```
+
+# Production mode
+To run in `prod` profile from your IDE, you will need to add a VM Options for `-Dquarkus.profile=prod`
+
+
+# Kafka Streams
+Processing of the event emitted from the `event-store` Kafka topic are aggregated by `event-streams` into a new Kafka 
+topic `event-store-aggregated` which is then consumed by other applications.
+
+
