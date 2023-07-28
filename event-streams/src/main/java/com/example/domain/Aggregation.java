@@ -48,9 +48,7 @@ public class Aggregation {
                         .divide(BigDecimal.valueOf(accountTotal), RoundingMode.CEILING);
                 return this;
             }
-            default -> {
-                throw new RuntimeException("Invalid event type " + evt.getEventType());
-            }
         }
+        return this; // ignore event
     }
 }
