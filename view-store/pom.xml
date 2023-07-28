@@ -23,5 +23,16 @@
       <artifactId>quarkus-mongodb-panache</artifactId>
     </dependency>
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>native</id>
+      <properties>
+        <quarkus.package.type>native</quarkus.package.type>
+        <skipITs>false</skipITs>
+        <quarkus.native.additional-build-args>-H:ReflectionConfigurationFiles=reflection-config.json</quarkus.native.additional-build-args>
+      </properties>
+    </profile>
+  </profiles>
   
 </project>
