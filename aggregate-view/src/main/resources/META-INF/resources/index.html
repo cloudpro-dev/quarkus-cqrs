@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Account Summary</title>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/css/patternfly.min.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/css/patternfly-additions.min.css">
+    <style>
+        .hidden {
+            display: none;
+        }
+        .visible {
+            display: flow;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Summary</h2>
+    <div id="waiting-row" class="row">
+        <p class="col-md-12">Waiting on data...</p>
+    </div>
+    <div id="summary-row" class="row hidden">
+        <p class="col-md-12">Account total: <strong><span id="accountTotal">N/A</span></strong></p>
+        <p class="col-md-12">Deposit count: <strong><span id="countDeposits">N/A</span></strong></p>
+        <p class="col-md-12">Withdrawal count: <strong><span id="countWithdrawals">N/A</span></strong></p>
+        <p class="col-md-12">Total of all deposits: <strong>&pound;<span id="totalDeposits">N/A</span></strong></p>
+        <p class="col-md-12">Total of all withdrawals: <strong>&pound;<span id="totalWithdrawals">N/A</span></strong></p>
+        <p class="col-md-12">Average balance: <strong>&pound;<span id="avgBalance">N/A</span></strong></p>
+        <p class="col-md-12">Average deposit: <strong>&pound;<span id="avgDeposit">N/A</span></strong></p>
+        <p class="col-md-12">Average withdrawal: <strong>&pound;<span id="avgWithdrawal">N/A</span></strong></p>
+    </div>
+</div>
+</body>
+<script>
+    var socket = new WebSocket("ws://" + location.host + "/bankaccount-aggregates/" + uuidv4());
+    socket.onmessage =function(m) {
+        document.getElementById('waiting-row').className = "row hidden";
+        document.getElementById('summary-row').className = "row visible";
+
+        console.log("Got message: " + m.data);
+        var data = JSON.parse(m.data);
+        console.log("Parsed data: " + data);
+        document.getElementById('accountTotal').textContent=data.accountTotal;
+        document.getElementById('countDeposits').textContent=data.countDeposits;
+        document.getElementById('countWithdrawals').textContent=data.countWithdrawals;
+        document.getElementById('totalDeposits').textContent=data.totalDeposits;
+        document.getElementById('totalWithdrawals').textContent=data.totalWithdrawals;
+        document.getElementById('avgBalance').textContent=data.avgBalance;
+        document.getElementById('avgDeposit').textContent=data.avgDeposit;
+        document.getElementById('avgWithdrawal').textContent=data.avgWithdrawal;
+    }
+
+    function uuidv4() {
+        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        );
+    }
+</script>
+</html>

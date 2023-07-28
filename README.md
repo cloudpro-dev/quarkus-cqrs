@@ -164,6 +164,11 @@ curl http://localhost:8889/metrics
 
 # Tempo
 
+# Kafka Streams
+Processing of the event emitted from the `event-store` Kafka topic are aggregated by `event-streams` into a new Kafka 
+topic `event-store-aggregated` which is then consumed by other applications.
+
+
 ## Configuration
 ```shell
 curl localhost:3200/status/config | grep metrics
