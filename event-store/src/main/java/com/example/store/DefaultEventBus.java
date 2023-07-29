@@ -3,6 +3,7 @@ package com.example.store;
 import com.example.util.SerializerUtils;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.reactive.messaging.MutinyEmitter;
+import io.smallrye.reactive.messaging.kafka.Record;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.jboss.logging.Logger;
 
@@ -22,16 +23,17 @@ public class DefaultEventBus implements EventBus {
 
     @Inject
     @Channel("event-store")
-    MutinyEmitter<byte[]> emitter;
+    MutinyEmitter<Record<String, byte[]>> emitter;
 
     @Override
     public Uni<Void> publish(List<Event> events) {
         final byte[] eventsBytes = SerializerUtils.serializeToJsonBytes(events.toArray(new Event[]{}));
-        return emitter.send(eventsBytes)
+        String aggregateId = events.get(0).getAggregateId(); // same for all events
+        return emitter.send(Record.of(aggregateId, eventsBytes))
                 .ifNoItem().after(Duration.ofMillis(PUBLISH_TIMEOUT)).fail()
                 .onFailure().invoke(Throwable::printStackTrace)
                 .onFailure().retry().withBackOff(Duration.of(BACKOFF_TIMEOUT, ChronoUnit.MILLIS)).atMost(RETRY_COUNT)
-                .onItem().invoke(msg -> logger.infof("publish topic: %s, value: %s", "event-store", new String(eventsBytes)))
+                .onItem().invoke(msg -> logger.infof("publish topic: %s, key: %s, value: %s", "event-store", aggregateId, new String(eventsBytes)))
                 .replaceWithVoid();
     }
 }
