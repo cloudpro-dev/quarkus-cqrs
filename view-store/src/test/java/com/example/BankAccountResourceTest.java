@@ -12,6 +12,7 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import io.quarkus.test.junit.QuarkusTest;
 import net.mguenther.kafka.junit.*;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
@@ -47,16 +48,18 @@ public class BankAccountResourceTest {
         byte[] createEventBytes = serializeToJsonBytes(Collections.singletonList(createEvent).toArray(new Event[]{}));
         byte[] depositEventBytes = serializeToJsonBytes(Collections.singletonList(depositEvent).toArray(new Event[]{}));
 
-        kafka.send(
-                SendValues.to("event-store", createEventBytes)
-                        .with(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.ByteArraySerializer.class));
+        String aggregateId = createEvent.getAggregateId();
+        List<KeyValue<String, byte[]>> records = new ArrayList<>();
+        records.add(new KeyValue<>(aggregateId, createEventBytes));
+        records.add(new KeyValue<>(aggregateId, depositEventBytes));
 
-        kafka.send(
-                SendValues.to("event-store", depositEventBytes)
-                        .with(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.ByteArraySerializer.class));
+        kafka.send(SendKeyValues.to("event-store", records)
+                .with(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class));
 
         // wait for 2 messages to arrive before proceeding
         kafka.observeValues(ObserveKeyValues.on("event-store", 2));
+
+        Thread.sleep(1000);
 
         // read all balances
         given()

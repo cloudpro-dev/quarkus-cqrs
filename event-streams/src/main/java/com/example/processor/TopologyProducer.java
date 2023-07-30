@@ -43,18 +43,18 @@ public class TopologyProducer {
         ObjectMapperSerde<Event> eventSerde = new ObjectMapperSerde<>(Event.class);
         ObjectMapperSerde<Aggregation> aggregationSerde = new ObjectMapperSerde<>(Aggregation.class);
 
-        KeyValueMapper<Void, byte[], KeyValue<Void, Event[]>> mapper = (k, v) -> new KeyValue<>(null, SerializerUtils.deserializeEventsFromJsonBytes(v));
+        KeyValueMapper<String, byte[], KeyValue<String, Event[]>> mapper = (k, v) -> new KeyValue<>(k, SerializerUtils.deserializeEventsFromJsonBytes(v));
 
         builder
                 .stream(
                         EVENTS_TOPIC,
-                        Consumed.with(Serdes.Void(), Serdes.ByteArray())
+                        Consumed.with(Serdes.String(), Serdes.ByteArray())
                 )
-                .peek((k, v) -> logger.infof("Observed bytes: %s", v))
+                .peek((k, v) -> logger.debugf("Observed bytes: %s", v))
                 .map(mapper)
-                .peek((k, v) -> logger.infof("Mapped events: %s", v))
+                .peek((k, v) -> logger.debugf("Mapped events: %s", v))
                 .flatMapValues(events -> Arrays.asList(events))
-                .peek((k, v) -> logger.infof("Transformed event: %s", v))
+                .peek((k, v) -> logger.debugf("Transformed event: %s", v))
                 .groupBy((k, v) -> {
                     logger.infof("Group by key=%s, value=%s", k, v);
                     return v.getAggregateType();
@@ -65,7 +65,7 @@ public class TopologyProducer {
                                 .withKeySerde(Serdes.String())
                                 .withValueSerde(aggregationSerde))
                 .toStream()
-                .peek((k, v) -> logger.infof("Stream event: %s", v))
+                .peek((k, v) -> logger.debugf("Stream event: %s", v))
                 .to(
                         EVENT_AGGREGATE_TOPIC,
                         Produced.with(Serdes.String(), aggregationSerde)
