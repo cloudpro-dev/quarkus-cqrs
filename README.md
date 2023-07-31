@@ -67,16 +67,34 @@ To test the native image, run the integration tests against the generated binary
 
 # Docker deployment
 
-To run the application using a local Docker setup instead of Development mode, you can run the `docker-compose.yml` file in the project root directory.
+## Pre-requisites
+You should have a recent version of Docker installed (19.03.0+)
 
-This will package the application as a Docker image and then run the whole stack:
+Deploy the infrastructure to Docker:
+```shell
+docker-compose -f docker-compose.yml up -d
+```
+
+Next you need to build the Docker container images from the applications:
 ```shell
 mvn clean package \
   -DskipTests \
   -Dquarkus.container-image.build=true \
   -Dquarkus.container-image.group=cqrs
-  
-docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d
+```
+
+If you wish to build a native version of the application into the container image, then use the following command:
+```shell
+mvn clean package \
+  -Pnative \
+  -DskipTests \
+  -Dquarkus.container-image.build=true \
+  -Dquarkus.container-image.group=cqrs
+```
+
+Finally, run the packaged application containers as a single platform:
+```shell
+docker-compose -f docker-compose-dev.yml up -d
 ```
 
 # Kubernetes deployment
