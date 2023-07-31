@@ -8,7 +8,7 @@ If you want to learn more about Quarkus, please visit its website: https://quark
 
 You can run your application in dev mode that enables live coding using:
 ```shell script
-./mvnw compile quarkus:dev
+mvn compile quarkus:dev
 ```
 
 > **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
@@ -17,7 +17,7 @@ You can run your application in dev mode that enables live coding using:
 
 The application can be packaged using:
 ```shell script
-./mvnw package
+mvn package
 ```
 It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
 Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
@@ -26,7 +26,7 @@ The application is now runnable using `java -jar target/quarkus-app/quarkus-run.
 
 If you want to build an _über-jar_, execute the following command:
 ```shell script
-./mvnw package -Dquarkus.package.type=uber-jar
+mvn package -Dquarkus.package.type=uber-jar
 ```
 
 The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
@@ -35,12 +35,12 @@ The application, packaged as an _über-jar_, is now runnable using `java -jar ta
 
 You can create a native executable using: 
 ```shell script
-./mvnw package -Pnative
+mvn package -Pnative
 ```
 
 Or, if you don't have GraalVM installed, you can run the native executable build in a container using: 
 ```shell script 
-./mvnw package -Pnative -Dquarkus.native.container-build=true
+mvn package -Pnative -Dquarkus.native.container-build=true
 ```
 
 You can then execute your native executable with: `./target/event-sourcing-1.0.0-SNAPSHOT-runner`
@@ -51,7 +51,7 @@ If you want to learn more about building native executables, please consult http
 
 To test the native image, run the integration tests against the generated binary:
 ```shell
-./mvnw verify -Pnative
+mvn verify -Pnative
 ```
 
 ## Related Guides
@@ -203,14 +203,22 @@ kubectl scale -n cqrs deployment view-store --replicas=3
 ### Standard JAR testing 
 To test the standard JAR version of the application you can run the standard integration tests:
 ```shell
-./mvnw clean verify
+mvn clean verify
 ```
 
 ### Native image testing
 Integration tests are used to make sure that the application functions correct once it has been converted to a native application.
 ```shell
-./mvnw clean verify -Pnative
+mvn clean verify -Pnative
 ```
+
+Note: If you receive an error similar to the following:
+```shell
+Error: Invalid Path entry event-store-1.0.0-SNAPSHOT-runner.jar
+Caused by: java.nio.file.NoSuchFileException: /project/event-store-1.0.0-SNAPSHOT-runner.jar
+```
+Then check you are not connected to the Minikube docker instance! An easy way to check is by running `docker ps` and
+checking the output for `k8.io` based containers. You can always start a new terminal to make sure.
 
 ## Manual testing
 You can manually call the application API to create a new account and perform some actions.
