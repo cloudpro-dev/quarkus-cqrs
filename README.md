@@ -39,7 +39,7 @@ You can create a native executable using:
 ```
 
 Or, if you don't have GraalVM installed, you can run the native executable build in a container using: 
-```shell script
+```shell script 
 ./mvnw package -Pnative -Dquarkus.native.container-build=true
 ```
 
@@ -79,55 +79,71 @@ mvn clean package \
 docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d
 ```
 
-If you wish to deploy only the infrastructure on Docker and then connect with local instance of the application for debugging.
-```shell
-mvn clean package \
-  -DskipTests \
-  -Dquarkus.container-image.build=true \
-  -Dquarkus.container-image.group=cqrs \
-  -Dquarkus.container-image.group=cqrs
+# Kubernetes deployment
 
-      - QUARKUS_HTTP_PORT=9020
-      - QUARKUS_HTTP_SSL_PORT=9021
-      - QUARKUS_DATASOURCE_USERNAME=postgres
-      - QUARKUS_DATASOURCE_PASSWORD=postgres
-      - KAFKA_BOOTSTRAP_SERVERS=BROKER://localhost:9092
-      - QUARKUS_DATASOURCE_DB_KIND=postgresql
-      - QUARKUS_DATASOURCE_REACTIVE_URL=vertx-reactive:postgresql://localhost:5432/microservices
-      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://localhost:5432/microservices
+## Pre-requisites
+If you have not already, start Minikube and wait for it to become ready.
+```shell
+minikube start
+minikube addons enable metrics-server
 ```
 
-# Production mode
-To run in `prod` profile from your IDE, you will need to add a VM Options for `-Dquarkus.profile=prod`
+Before we can deploy the applications we must set up the necessary infrastructure in the Kubernetes cluster.
 
-# Deploying the application in Kubernetes
-
+Create a new namespace for the whole platform:
 ```shell
 kubectl create ns cqrs
 ```
 
+Deploy the infrastructure to Kubernetes:
 ```shell
 kubectl apply -f ./kubernetes/postgres.yml -n cqrs
 kubectl apply -f ./kubernetes/mongo.yml -n cqrs
 kubectl apply -f ./kubernetes/kafka.yml -n cqrs
 ```
 
-Kafka client can be run to perform activities on the Kafka instances
+Next we need to create the Kafka topics with the correct partition configuration.
+
+To access the Kafka server in the Kubernetes cluster, we must add a new Pod running Kafka client tools:
 ```shell
 kubectl run kafka-client -n cqrs --rm -ti --image bitnami/kafka:3.1.0 -- bash
-
-ls /opt/bitnami/kafka/bin
-kafka-acls.sh
-kafka-broker-api-versions.sh
-kafka-cluster.sh
-kafka-configs.sh
-kafka-console-consumer.sh
-kafka-console-producer.sh
-kafka-consumer-groups.sh
-kafka-consumer-perf-test.sh
-kafka-delegation-tokens.sh
-kafka-delete-records.sh
 ```
+
+Once the new pod terminal is available, run the following commands:
+```shell
+/opt/bitnami/kafka/bin/kafka-topics.sh \
+  --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 \ 
+  --topic event-store \
+  --partitions=3 \
+  --create
+```
+
+Finally, we query the topic to make sure the configuration is correct:
+```shell
+/opt/bitnami/kafka/bin/kafka-topics.sh \
+  --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 \ 
+  --topic event-store \ 
+  --describe
+
+Topic: event-store      TopicId: jOA78GwxQM-WIlg-8aGNJA PartitionCount: 3       ReplicationFactor: 1    Configs: min.insync.replicas=1,segment.bytes=1073741824
+        Topic: event-store      Partition: 0    Leader: 0       Replicas: 0     Isr: 0
+        Topic: event-store      Partition: 1    Leader: 0       Replicas: 0     Isr: 0
+        Topic: event-store      Partition: 2    Leader: 0       Replicas: 0     Isr: 0
+```
+Note: All other topics will be created on demand by the application with a single partition.
+
+If you wish to inspect the messages on the Kafka topic/partition, you can use:
+```shell
+/opt/bitnami/kafka/bin/kafka-console-consumer.sh \
+  --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 \
+  --topic event-store \
+  --from-beginning \
+  --partition 0
+```
+
+## Deploying the applications
+
+The next step is to package the application into containers which can then be deployed directly into the Kubernetes cluster.
 
 **Important:** We must build the image via the Minikube Docker Daemon to make it available to the Kubernetes cluster for deployment:
 ```
@@ -135,105 +151,67 @@ eval $(minikube -p minikube docker-env)
 ```
 
 ### Standard JAR build
-
+To build a standard Java JAR deployment, use the following command:
 ```
-./mvnw clean package \
+mvn clean package \
     -DskipTests=true \
     -Dquarkus.container-image.build=true \
     -Dquarkus.container-image.group=cqrs \
+    -Dquarkus.kubernetes.namespace=cqrs \
     -Dquarkus.kubernetes.deploy=true
 ```
 
 ### Native image build
+To build a native image version of the application, use the following commands:
 ```
-./mvnw clean package \
+mvn clean package \
+    -Pnative \
     -DskipTests=true \
-    -Dnative \
     -Dquarkus.container-image.build=true \
     -Dquarkus.container-image.group=cqrs \
     -Dquarkus.native.remote-container-build=true \
+    -Dquarkus.kubernetes.namespace=cqrs \
     -Dquarkus.kubernetes.deploy=true
 ```
 
-# Password encryption
-
-Kubernetes stores the content of all secrets in a base 64 encoded format. If you want to see how your string will appear in a base64 format, execute the following.
+## Scale the consumers
+Once all the consumers come up, we can scale each of the services horizontally using the following command:
 ```shell
-echo "devopscube" | base64 
-//after encoding it, this becomes ZGV2b3BzY3ViZQo=
+kubectl scale -n cqrs deployment view-store --replicas=3
 ```
-
-If you want to decode a base64 string. Run
-```shell
-echo "ZGV2b3BzY3ViZQo=" | base64 --decode
-//after decoding it, this will give devopscube
-```
-
-# Application
 
 ## Testing
 
-# 
+### Standard JAR testing 
 To test the standard JAR version of the application you can run the standard integration tests:
 ```shell
 ./mvnw clean verify
 ```
 
-# Native image testing
+### Native image testing
 Integration tests are used to make sure that the application functions correct once it has been converted to a native application.
 ```shell
 ./mvnw clean verify -Pnative
 ```
 
-## Commands
+## Manual testing
 You can manually call the application API to create a new account and perform some actions.
 
-### Create a new bank account
+To run the commands against the local instances, create the following env vars:
 ```shell
-EVENT_STORE_URL=$(minikube service --url --https event-store -n cqrs | head -n 1)
-VIEW_STORE_URL=$(minikube service --url view-store -n cqrs | head -n 1)
-ID=$(curl -s -X POST -H "Content-Type: application/json" -d '{"email":"test@test.com", "userName":"testuser12345", "address":"11 Test Lane, Test Town, TT1 1TT"}' $EVENT_STORE_URL/api/v1/bank) 
-echo "$ID"
+export EVENT_STORE_URL=localhost:9020
+export VIEW_STORE_URL=localhost:9010
+export AGGREGATE_VIEW_URL=localhost:9040
 ```
 
-### Update email address
+To run the commands against a Kubernetes deployment, create the following env vars:
 ```shell
-curl -v -X POST -H "Content-Type: application/json" -d '{"email":"test123@test.com"}' $EVENT_STORE_URL/api/v1/bank/email/$ID
+export EVENT_STORE_URL=$(minikube service --url event-store -n cqrs | head -n 1)
+export VIEW_STORE_URL=$(minikube service --url view-store -n cqrs | head -n 1)
+export AGGREGATE_VIEW_URL=$(minikube service --url aggregate-view -n cqrs | head -n 1)
 ```
 
-### Update address
+Now you can run the commands script which will execute all the bank account commands and then query back the latest state of the account from the query side.
 ```shell
-curl -v -X POST -H "Content-Type: application/json" -d '{"address":"64 Test Ave, Testington, 1TT TT1"}' $EVENT_STORE_URL/api/v1/bank/address/$ID
+./commands.sh
 ```
-
-### Deposit funds
-```shell
-curl -v -X POST -H "Content-Type: application/json" -d '{"amount": 500.00}' $EVENT_STORE_URL/api/v1/bank/deposit/$ID
-```
-
-### Withdraw funds
-```shell
-curl -v -X POST -H "Content-Type: application/json" -d '{"amount": 100.00}' $EVENT_STORE_URL/api/v1/bank/withdraw/$ID
-```
-
-## Queries
-
-### Find all sorted by balance
-```shell
-curl -v "$VIEW_STORE_URL/api/v1/bank/balance?page=0&size=3"
-```
-
-### Get bank account by ID
-```shell
-curl -v "$VIEW_STORE_URL/api/v1/bank/$ID"
-```
-
-# Production mode
-To run in `prod` profile from your IDE, you will need to add a VM Options for `-Dquarkus.profile=prod`
-
-
-# Kafka Streams
-Processing of the event emitted from the `event-store` Kafka topic are aggregated by `event-streams` into a new Kafka 
-topic `event-store-aggregated` which is then consumed by other applications.
-
-

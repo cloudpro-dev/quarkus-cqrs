@@ -9,7 +9,8 @@
   <modules>
     <module>event-store</module>
     <module>view-store</module>
-      <module>event-streams</module>
+    <module>event-streams</module>
+    <module>aggregate-view</module>
   </modules>
   <properties>
     <compiler-plugin.version>3.11.0</compiler-plugin.version>
@@ -173,7 +174,6 @@
       <properties>
         <skipITs>false</skipITs>
         <quarkus.package.type>native</quarkus.package.type>
-        <quarkus.native.additional-build-args>-H:ReflectionConfigurationFiles=reflection-config.json</quarkus.native.additional-build-args>
       </properties>
     </profile>
   </profiles>
