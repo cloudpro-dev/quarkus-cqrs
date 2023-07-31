@@ -8,7 +8,7 @@ If you want to learn more about Quarkus, please visit its website: https://quark
 
 You can run your application in dev mode that enables live coding using:
 ```shell script
-./mvnw compile quarkus:dev
+mvn compile quarkus:dev
 ```
 
 > **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
@@ -17,7 +17,7 @@ You can run your application in dev mode that enables live coding using:
 
 The application can be packaged using:
 ```shell script
-./mvnw package
+mvn package
 ```
 It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
 Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
@@ -26,7 +26,7 @@ The application is now runnable using `java -jar target/quarkus-app/quarkus-run.
 
 If you want to build an _über-jar_, execute the following command:
 ```shell script
-./mvnw package -Dquarkus.package.type=uber-jar
+mvn package -Dquarkus.package.type=uber-jar
 ```
 
 The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
@@ -35,12 +35,12 @@ The application, packaged as an _über-jar_, is now runnable using `java -jar ta
 
 You can create a native executable using: 
 ```shell script
-./mvnw package -Pnative
+mvn package -Pnative
 ```
 
 Or, if you don't have GraalVM installed, you can run the native executable build in a container using: 
-```shell script
-./mvnw package -Pnative -Dquarkus.native.container-build=true
+```shell script 
+mvn package -Pnative -Dquarkus.native.container-build=true
 ```
 
 You can then execute your native executable with: `./target/event-sourcing-1.0.0-SNAPSHOT-runner`
@@ -51,7 +51,7 @@ If you want to learn more about building native executables, please consult http
 
 To test the native image, run the integration tests against the generated binary:
 ```shell
-./mvnw verify -Pnative
+mvn verify -Pnative
 ```
 
 ## Related Guides
@@ -63,86 +63,184 @@ To test the native image, run the integration tests against the generated binary
 - JDBC Driver - PostgreSQL ([guide](https://quarkus.io/guides/datasource)): Connect to the PostgreSQL database via JDBC
 - Reactive PostgreSQL client ([guide](https://quarkus.io/guides/reactive-sql-clients)): Connect to the PostgreSQL database using the reactive pattern
 
-# Application
 
-## Commands
-
-### Create a new bank account
-```shell
-ID=$(curl -s -X POST -H "Content-Type: application/json" -d '{"email":"test@test.com", "userName":"testuser12345", "address":"11 Test Lane, Test Town, TT1 1TT"}' localhost:9020/api/v1/bank) 
-echo "$ID"
-```
-
-### Update email address
-```shell
-curl -v -X POST -H "Content-Type: application/json" -d '{"email":"test123@test.com"}' localhost:9020/api/v1/bank/email/$ID
-```
-
-### Update address
-```shell
-curl -v -X POST -H "Content-Type: application/json" -d '{"address":"64 Test Ave, Testington, 1TT TT1"}' localhost:9020/api/v1/bank/address/$ID
-```
-
-### Deposit funds
-```shell
-curl -v -X POST -H "Content-Type: application/json" -d '{"amount": 500.00}' localhost:9020/api/v1/bank/deposit/$ID
-```
-
-### Withdraw funds
-```shell
-curl -v -X POST -H "Content-Type: application/json" -d '{"amount": 100.00}' localhost:9020/api/v1/bank/withdraw/$ID
-```
-
-## Queries
-
-### Find all sorted by balance
-```shell
-curl -v "localhost:9010/api/v1/bank/balance?page=0&size=3"
-```
-
-### Get bank account by ID
-```shell
-curl -v "localhost:9010/api/v1/bank/$ID"
-```
 
 # Docker deployment
 
-To run the application using a local Docker setup instead of Development mode, you can run the `docker-compose.yml` file in the project root directory.
+## Pre-requisites
+You should have a recent version of Docker installed (19.03.0+)
+
+Deploy the infrastructure to Docker:
 ```shell
 docker-compose -f docker-compose.yml up -d
 ```
-Run the `event-store` application
+
+Next you need to build the Docker container images from the applications:
 ```shell
-mvn package
-java -jar target/quarkus-app/quarkus-run.jar
+mvn clean package \
+  -DskipTests \
+  -Dquarkus.container-image.build=true \
+  -Dquarkus.container-image.group=cqrs
 ```
 
+If you wish to build a native version of the application into the container image, then use the following command:
 ```shell
-docker-compose exec kafka /kafka/bin/kafka-console-consumer.sh \
-    --bootstrap-server kafka:9092 \
-    --from-beginning \
-    --property print.key=true \
-    --topic quarkus-db-server.public.customers
+mvn clean package \
+  -Pnative \
+  -DskipTests \
+  -Dquarkus.container-image.build=true \
+  -Dquarkus.container-image.group=cqrs
 ```
 
-# Native Image
-## Building
-Docker containers are generated using the native binary because of the `quarkus-container-image-jib` dependency and by adding the following properties to the application:
-- `quarkus.container-image.build`
-- `quarkus.native.container-build`
-_Note:_ If you want the container to use a non-native image, then set the `quarkus.native.container-build` to `false`.
+Finally, run the packaged application containers as a single platform:
 ```shell
-mvn package -DskipTests -Pnative
+docker-compose -f docker-compose-dev.yml up -d
+```
+
+# Kubernetes deployment
+
+## Pre-requisites
+If you have not already, start Minikube and wait for it to become ready.
+```shell
+minikube start
+minikube addons enable metrics-server
+```
+
+Before we can deploy the applications we must set up the necessary infrastructure in the Kubernetes cluster.
+
+Create a new namespace for the whole platform:
+```shell
+kubectl create ns cqrs
+```
+
+Deploy the infrastructure to Kubernetes:
+```shell
+kubectl apply -f ./kubernetes/postgres.yml -n cqrs
+kubectl apply -f ./kubernetes/mongo.yml -n cqrs
+kubectl apply -f ./kubernetes/kafka.yml -n cqrs
+```
+
+Next we need to create the Kafka topics with the correct partition configuration.
+
+To access the Kafka server in the Kubernetes cluster, we must add a new Pod running Kafka client tools:
+```shell
+kubectl run kafka-client -n cqrs --rm -ti --image bitnami/kafka:3.1.0 -- bash
+```
+
+Once the new pod terminal is available, run the following commands:
+```shell
+/opt/bitnami/kafka/bin/kafka-topics.sh \
+  --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 \ 
+  --topic event-store \
+  --partitions=3 \
+  --create
+```
+
+Finally, we query the topic to make sure the configuration is correct:
+```shell
+/opt/bitnami/kafka/bin/kafka-topics.sh \
+  --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 \ 
+  --topic event-store \ 
+  --describe
+
+Topic: event-store      TopicId: jOA78GwxQM-WIlg-8aGNJA PartitionCount: 3       ReplicationFactor: 1    Configs: min.insync.replicas=1,segment.bytes=1073741824
+        Topic: event-store      Partition: 0    Leader: 0       Replicas: 0     Isr: 0
+        Topic: event-store      Partition: 1    Leader: 0       Replicas: 0     Isr: 0
+        Topic: event-store      Partition: 2    Leader: 0       Replicas: 0     Isr: 0
+```
+Note: All other topics will be created on demand by the application with a single partition.
+
+If you wish to inspect the messages on the Kafka topic/partition, you can use:
+```shell
+/opt/bitnami/kafka/bin/kafka-console-consumer.sh \
+  --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 \
+  --topic event-store \
+  --from-beginning \
+  --partition 0
+```
+
+## Deploying the applications
+
+The next step is to package the application into containers which can then be deployed directly into the Kubernetes cluster.
+
+**Important:** We must build the image via the Minikube Docker Daemon to make it available to the Kubernetes cluster for deployment:
+```
+eval $(minikube -p minikube docker-env)
+```
+
+### Standard JAR build
+To build a standard Java JAR deployment, use the following command:
+```
+mvn clean package \
+    -DskipTests=true \
+    -Dquarkus.container-image.build=true \
+    -Dquarkus.container-image.group=cqrs \
+    -Dquarkus.kubernetes.namespace=cqrs \
+    -Dquarkus.kubernetes.deploy=true
+```
+
+### Native image build
+To build a native image version of the application, use the following commands:
+```
+mvn clean package \
+    -Pnative \
+    -DskipTests=true \
+    -Dquarkus.container-image.build=true \
+    -Dquarkus.container-image.group=cqrs \
+    -Dquarkus.native.remote-container-build=true \
+    -Dquarkus.kubernetes.namespace=cqrs \
+    -Dquarkus.kubernetes.deploy=true
+```
+
+## Scale the consumers
+Once all the consumers come up, we can scale each of the services horizontally using the following command:
+```shell
+kubectl scale -n cqrs deployment view-store --replicas=3
 ```
 
 ## Testing
-Integration tests are used to make sure that the application functions correct once it has been converted to a native application.
+
+### Standard JAR testing 
+To test the standard JAR version of the application you can run the standard integration tests:
 ```shell
-./mvnw clean verify -Pnative
+mvn clean verify
 ```
 
-# Production mode
-To run in `prod` profile from your IDE, you will need to add a VM Options for `-Dquarkus.profile=prod`
+### Native image testing
+Integration tests are used to make sure that the application functions correct once it has been converted to a native application.
+```shell
+mvn clean verify -Pnative
+```
+
+Note: If you receive an error similar to the following:
+```shell
+Error: Invalid Path entry event-store-1.0.0-SNAPSHOT-runner.jar
+Caused by: java.nio.file.NoSuchFileException: /project/event-store-1.0.0-SNAPSHOT-runner.jar
+```
+Then check you are not connected to the Minikube docker instance! An easy way to check is by running `docker ps` and
+checking the output for `k8.io` based containers. You can always start a new terminal to make sure.
+
+## Manual testing
+You can manually call the application API to create a new account and perform some actions.
+
+To run the commands against the local instances, create the following env vars:
+```shell
+export EVENT_STORE_URL=localhost:9020
+export VIEW_STORE_URL=localhost:9010
+export AGGREGATE_VIEW_URL=localhost:9040
+```
+
+To run the commands against a Kubernetes deployment, create the following env vars:
+```shell
+export EVENT_STORE_URL=$(minikube service --url event-store -n cqrs | head -n 1)
+export VIEW_STORE_URL=$(minikube service --url view-store -n cqrs | head -n 1)
+export AGGREGATE_VIEW_URL=$(minikube service --url aggregate-view -n cqrs | head -n 1)
+```
+
+Now you can run the commands script which will execute all the bank account commands and then query back the latest state of the account from the query side.
+```shell
+./commands.sh
+```
 
 # Monitoring
 
@@ -163,11 +261,6 @@ curl http://localhost:8889/metrics
 ```
 
 # Tempo
-
-# Kafka Streams
-Processing of the event emitted from the `event-store` Kafka topic are aggregated by `event-streams` into a new Kafka 
-topic `event-store-aggregated` which is then consumed by other applications.
-
 
 ## Configuration
 ```shell

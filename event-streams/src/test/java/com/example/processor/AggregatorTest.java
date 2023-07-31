@@ -17,10 +17,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @QuarkusTest
 public class AggregatorTest {
@@ -44,28 +41,19 @@ public class AggregatorTest {
         byte[] depositEventBytes = SerializerUtils.serializeToJsonBytes(Collections.singletonList(depositEvent).toArray(new Event[]{}));
         byte[] withdrawalEventBytes = SerializerUtils.serializeToJsonBytes(Collections.singletonList(withdrawalEvent).toArray(new Event[]{}));
 
-        kafka.send(
-                SendValues.to("event-store", createEventBytes)
-                        .with(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class));
+        String aggregateId = createEvent.getAggregateId();
+        List<KeyValue<String, byte[]>> records = new ArrayList<>();
+        records.add(new KeyValue<>(aggregateId, createEventBytes));
+        records.add(new KeyValue<>(aggregateId, createEventBytes));
+        records.add(new KeyValue<>(aggregateId, depositEventBytes));
+        records.add(new KeyValue<>(aggregateId, depositEventBytes));
+        records.add(new KeyValue<>(aggregateId, withdrawalEventBytes));
 
-        kafka.send(
-                SendValues.to("event-store", createEventBytes)
-                        .with(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class));
+        kafka.send(SendKeyValues.to("event-store", records)
+                .with(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class));
 
-        kafka.send(
-                SendValues.to("event-store", depositEventBytes)
-                        .with(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class));
-
-        kafka.send(
-                SendValues.to("event-store", depositEventBytes)
-                        .with(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class));
-
-        kafka.send(
-                SendValues.to("event-store", withdrawalEventBytes)
-                        .with(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class));
-
-        // wait for the 4 events to be delivered
-        kafka.observeValues(ObserveKeyValues.on("event-store", 4));
+        // wait for the 5 events to be delivered
+        kafka.observeValues(ObserveKeyValues.on("event-store", 5));
 
         // wait for 2 aggregation results to arrive
         List<String> aggregateResults = kafka.observeValues(ObserveKeyValues.on("event-store-aggregated", 1));
