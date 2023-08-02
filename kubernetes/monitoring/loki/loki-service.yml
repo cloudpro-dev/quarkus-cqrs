@@ -1,0 +1,20 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: loki-service
+  namespace: monitoring
+spec:
+  selector:
+    app: loki
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3100
+      targetPort: 3100
+      nodePort: 30100
+    - name: grpc
+      protocol: TCP
+      port: 9096
+      targetPort: 9096
+      nodePort: 30096
+  type: NodePort

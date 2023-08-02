@@ -102,7 +102,8 @@ docker-compose -f docker-compose-dev.yml up -d
 ## Pre-requisites
 If you have not already, start Minikube and wait for it to become ready.
 ```shell
-minikube start
+minikube start --memory=8096 --cpus=6 --bootstrapper=kubeadm && \
+minikube addons enable dashboard && \
 minikube addons enable metrics-server
 ```
 
@@ -241,6 +242,13 @@ Now you can run the commands script which will execute all the bank account comm
 ```shell
 ./commands.sh
 ```
+
+Set up a new namespace for the monitoring platform:
+```shell
+kubectl create namespace monitoring
+```
+
+
 
 # Monitoring
 
