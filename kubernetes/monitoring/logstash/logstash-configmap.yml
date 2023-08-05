@@ -15,4 +15,8 @@ data:
     }
     output {
       stdout { codec => rubydebug }
+      loki { 
+        url => "http://loki-service:3100/loki/api/v1/push"
+        message_field => "message"
+      }
     }

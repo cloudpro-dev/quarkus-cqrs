@@ -8,10 +8,7 @@ kubectl apply -f rbac.yml -n monitoring
 ```
 
 ```shell
-kubectl apply -f filebeat-configmap.yml -n monitoring
-```
-
-```shell
+kubectl apply -f filebeat-configmap.yml -n monitoring && \
 kubectl apply -f filebeat-daemon.yml -n monitoring
 ```
 
