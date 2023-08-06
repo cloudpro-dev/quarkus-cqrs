@@ -102,7 +102,8 @@ docker-compose -f docker-compose-dev.yml up -d
 ## Pre-requisites
 If you have not already, start Minikube and wait for it to become ready.
 ```shell
-minikube start
+minikube start --memory=8096 --cpus=6 --bootstrapper=kubeadm && \
+minikube addons enable dashboard && \
 minikube addons enable metrics-server
 ```
 
@@ -129,19 +130,12 @@ kubectl run kafka-client -n cqrs --rm -ti --image bitnami/kafka:3.1.0 -- bash
 
 Once the new pod terminal is available, run the following commands:
 ```shell
-/opt/bitnami/kafka/bin/kafka-topics.sh \
-  --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 \ 
-  --topic event-store \
-  --partitions=3 \
-  --create
+/opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 --topic event-store --partitions=3 --create
 ```
 
 Finally, we query the topic to make sure the configuration is correct:
 ```shell
-/opt/bitnami/kafka/bin/kafka-topics.sh \
-  --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 \ 
-  --topic event-store \ 
-  --describe
+/opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 --topic event-store --describe
 
 Topic: event-store      TopicId: jOA78GwxQM-WIlg-8aGNJA PartitionCount: 3       ReplicationFactor: 1    Configs: min.insync.replicas=1,segment.bytes=1073741824
         Topic: event-store      Partition: 0    Leader: 0       Replicas: 0     Isr: 0
@@ -152,12 +146,9 @@ Note: All other topics will be created on demand by the application with a singl
 
 If you wish to inspect the messages on the Kafka topic/partition, you can use:
 ```shell
-/opt/bitnami/kafka/bin/kafka-console-consumer.sh \
-  --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 \
-  --topic event-store \
-  --from-beginning \
-  --partition 0
+/opt/bitnami/kafka/bin/kafka-console-consumer.sh --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 --topic event-store --from-beginning --partition 0
 ```
+N.B: If the `partition` argument is included, the command will only show events from the selected partition. 
 
 ## Deploying the applications
 
@@ -193,9 +184,20 @@ mvn clean package \
 ```
 
 ## Scale the consumers
+
+### Manually scaling consumers
 Once all the consumers come up, we can scale each of the services horizontally using the following command:
 ```shell
 kubectl scale -n cqrs deployment view-store --replicas=3
+```
+
+### Horizontal Pod Auto-scaling
+If we want to perform auto-scaling based on CPU or memory consumption of the applications, then we can use a Kubernetes
+HPA rules to scale the instances up and down.  The example included will spin up a new instance when all the running
+Pods have exceeded 50% CPU utilisation.  When CPU utilisation drops below 50% across all Pods, then the instances will
+be scaled back down.
+```shell
+kubectl create -f ./kubernetes/view-store-hpa.yml
 ```
 
 ## Testing
