@@ -60,6 +60,23 @@ services:
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@:9093
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+
+  kafka-init:
+    image: docker.io/bitnami/kafka:3.4
+    networks:
+      - cqrs
+    depends_on:
+      - kafka
+    entrypoint: >
+      /bin/sh -c "
+      /opt/bitnami/kafka/bin/kafka-topics.sh \
+      --bootstrap-server=BROKER://kafka:9092 \ 
+      --topic event-store \
+      --partitions=3 \
+      --create
+      exit 0;
+      "
+
 volumes:
   pg_data:
   kafka_data:
