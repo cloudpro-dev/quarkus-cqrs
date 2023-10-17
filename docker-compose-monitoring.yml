@@ -33,7 +33,7 @@ services:
       - prometheus
 
   loki:
-    image: grafana/loki:2.8.2
+    image: grafana/loki:latest
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - ./monitoring/loki/loki.yaml:/etc/loki/local-config.yaml:ro
@@ -58,25 +58,29 @@ services:
     depends_on:
       - loki
 
-  node_exporter:
-    image: quay.io/prometheus/node-exporter:v1.6.0
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-      - /:/host:ro,rslave
-    command:
-      - '--path.rootfs=/host'
-      - '--path.procfs=/host/proc'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.ignored-mount-points'
-      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
-    cap_add:
-      - SYS_TIME
+  minio:
+    image: minio/minio:latest
     ports:
-      - "9100:9100"
+      - "9000:9000"
+      - "9001:9001"
     networks:
       - cqrs
+    command: server ~ --address ':9000' --console-address ':9001'
+
+  minio-init:
+    image: minio/mc
+    networks:
+      - cqrs
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc rm -r --force myminio/loki;
+      /usr/bin/mc mb myminio/loki;
+      /usr/bin/mc policy set public myminio/loki;
+      exit 0;
+      "
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.1
@@ -113,7 +117,6 @@ services:
       - tempo
       - loki
       - cadvisor
-      - node_exporter
 
 volumes:
   grafana_data:
