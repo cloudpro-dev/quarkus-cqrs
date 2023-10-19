@@ -335,3 +335,71 @@ curl -G -s  "http://localhost:3100/loki/api/v1/query_range" --data-urlencode 'qu
 Storage for the logs is provided by a local Docker container using [MinIO Simple Storage Service (aka S3)](http://min.io).
 
 Access to the MinIO dashboard at http://localhost:9001/ using credentials of `minioadmin` and `minioadmin`
+
+# Load Testing
+
+The load tests are written using the Gatling load testing framework and each test provides insight into the application 
+performance under different load conditions.
+
+- Smoke Test - Simple one shot test to prove the applications are responding
+- Target Load Test - Used to prove the application can meet the required target transactions per second (TPS)
+- Soak Test - Used to look for memory leaks and other longer term issues
+- Spike Test - Proves the application can handle traffic spikes
+- Fatigue Test - Used to show the maximum traffic an application can handle before breaking
+
+Whilst running the load testing you can also view the `aggregate-view` application in your browser to see the results of the `event-streams` application.
+
+## Test Setup
+The test can be run against either your local development setup, Docker setup or Kubernetes deployment by providing
+the necessary environment variables.
+
+In the case of local development or Docker setup, the default test values of `localhost` will suffice for access.
+When running the tests against Kubernetes, you will need to set the environment variables to the correct URL based on the deployment. Minikube can provide a list of URLs for the deployment:
+```shell
+export EVENT_STORE_URL=$(minikube service --url event-store -n cqrs | head -n 1)
+export VIEW_STORE_URL=$(minikube service --url view-store -n cqrs | head -n 1)
+export AGGREGATE_VIEW_URL=$(minikube service --url aggregate-view -n cqrs | head -n 1)
+```
+
+### Smoke Test
+No additional environment variables are required to run the smoke test as these are single shot requests to the applications.
+```shell
+cd load-testing
+mvn gatling:test -Dgatling.simulationClass=cqrs.SmokeTestSimulation
+```
+
+### Target Load Test
+The following environment variables can be used to configure the tests for either Target Load or Soak testing:
+```shell
+export TARGET_TPS=10
+export TARGET_TPS_DURATION_IN_SECS=30
+export TARGET_TPS_RAMP_PERIOD_IN_SECS=5
+```
+
+### Spike Test
+The following environment variables can be used to configure the tests for Spike testing:
+```shell
+export SPIKE_BASE_TPS=10.0
+export SPIKE_RAMP_DURATION=10
+export SPIKE_MAX_TPS=50
+export SPIKE_INTERVAL=10
+```
+
+### Fatigue Test
+The following environment variables can be used to configure the tests for Fatigue testing:
+```shell
+export FATIGUE_INITIAL_TARGET_TPS=10.0
+export FATIGUE_STEP_TPS_INCREASE=5.0
+export FATIGUE_STEP_DURATION=10L
+export FATIGUE_TOTAL_STEP_COUNT=4
+```
+
+When you are ready to run a test you can use the Maven Gatling plugin task:
+```shell
+cd load-testing
+mvn gatling:test -Dgatling.simulationClass=cqrs.SmokeTestSimulation
+```
+
+
+
+
