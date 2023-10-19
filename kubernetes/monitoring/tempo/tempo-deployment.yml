@@ -16,20 +16,18 @@ spec:
       containers:
         - name: tempo
           image: grafana/tempo:2.1.1
-          command: ["-config.file=/etc/tempo.yml"]
+          args:
+            - -config.file=/etc/tempo/tempo.yml
           ports:
             - containerPort: 3200
             - containerPort: 4317
           volumeMounts:
-            - name: config
-              mountPath: /etc/tempo.yml
-              readOnly: true
-          resources:
-            limits:
-              memory: "1Gi"
-              cpu: "800m"
+            - name: config-volume
+              mountPath: /etc/tempo
       volumes:
-        - name: config
+        - name: config-volume
           configMap:
-            defaultMode: 0640
             name: tempo-configmap
+            items:
+              - key: tempo.yml
+                path: tempo.yml

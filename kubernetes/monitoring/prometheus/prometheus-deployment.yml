@@ -12,7 +12,7 @@ spec:
       labels:
         app: prometheus
     spec:
-      serviceAccountName: monitoring
+      serviceAccountName: prometheus
       containers:
         - name: prometheus-cont
           image: prom/prometheus
@@ -25,4 +25,5 @@ spec:
       volumes:
         - name: config-volume
           configMap:
-            name: prometheus-config
+            name: prometheus-configmap
+            defaultMode: 0640

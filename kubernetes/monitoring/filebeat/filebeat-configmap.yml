@@ -25,4 +25,4 @@ data:
       - add_docker_metadata:
 
     output.logstash:
-      hosts: [ 'logstash-service:5044' ]
+      hosts: [ 'logstash-svc.monitoring.svc.cluster.local:5044' ]

@@ -22,10 +22,6 @@ spec:
           volumeMounts:
             - name: config-volume
               mountPath: /etc/loki
-          resources:
-            limits:
-              memory: "1Gi"
-              cpu: "800m"
       volumes:
         - name: config-volume
           configMap:

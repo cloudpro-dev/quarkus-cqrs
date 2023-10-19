@@ -38,16 +38,20 @@ data:
       storage:
         path: /tmp/tempo/generator/wal
         remote_write:
-          - url: http://prometheus-service:9090/api/v1/write
+          - url: http://prometheus-svc.monitoring.svc.cluster.local:9090/api/v1/write
             send_exemplars: true
     
     storage:
       trace:
-        backend: local
+        backend: s3                        # backend configuration to use
         wal:
-          path: /tmp/tempo/wal
-        local:
-          path: /tmp/tempo/blocks
+          path: /tmp/tempo/wal             # where to store the the wal locally
+        s3:
+          bucket: tempo                    # how to store data in s3
+          endpoint: minio-svc.monitoring.svc.cluster.local:9000
+          access_key: minioadmin
+          secret_key: minioadmin
+          insecure: true
     
     overrides:
       metrics_generator_processors: [service-graphs, span-metrics] # enables metrics generator

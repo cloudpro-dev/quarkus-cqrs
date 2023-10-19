@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: minio-init
+spec:
+  template:
+    spec:
+      containers:
+        - name: minio-client
+          image: minio/mc
+          env:
+            - name: MC_HOST_minio
+              value: "http://minioadmin:minioadmin@minio-svc:9000"
+          command: ["/bin/sh"]
+          args:
+            - -c
+            - >-
+              /usr/bin/mc rm -r --force minio/loki;
+              /usr/bin/mc mb minio/loki;
+              /usr/bin/mc anonymous set public minio/loki;
+              /usr/bin/mc rm -r --force minio/tempo;
+              /usr/bin/mc mb minio/tempo;
+              /usr/bin/mc anonymous set public minio/tempo;
+              exit 0;
+      restartPolicy: Never
+  backoffLimit: 4

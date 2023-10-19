@@ -1,8 +1,8 @@
-# Event Sourcing (CQRS) demo
+# Event Sourcing (CQRS) tech demo
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
-If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
+If you want to learn more about Quarkus, please visit its website: https://quarkus.io/.
 
 # Development
 
@@ -123,6 +123,16 @@ minikube addons enable dashboard && \
 minikube addons enable metrics-server
 ```
 
+Once the Minikube cluster has started, we can start the Minikube Dashboard for monitoring the infrastructure as we
+deploy it.  Once started, the Dashboard will open in a new browser session.
+```shell
+minikube dashboard
+```
+_Note: This will block the current terminal session until you exit._
+
+**Important: All infrastructure will be created in a new separate namespace.  You will need to select the `cqrs` namespace in the Dashboard UI (top banner) to be able to manage these resources.**
+
+
 Before we can deploy the applications we must set up the necessary infrastructure in the Kubernetes cluster.
 
 Create a new namespace for the whole platform:
@@ -137,43 +147,10 @@ kubectl apply -f ./kubernetes/mongo.yml -n cqrs
 kubectl apply -f ./kubernetes/kafka.yml -n cqrs
 ```
 
-Next we need to create the Kafka topics with the correct partition configuration.
-
 To access the Kafka server in the Kubernetes cluster, we must add a new Pod running Kafka client tools:
 ```shell
-kubectl run kafka-client -n cqrs --rm -ti --image bitnami/kafka:3.1.0 -- bash
-```
-
-Once the new pod terminal is available, run the following commands:
-```shell
-/opt/bitnami/kafka/bin/kafka-topics.sh \
-  --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 \ 
-  --topic event-store \
-  --partitions=3 \
-  --create
-```
-
-Finally, we query the topic to make sure the configuration is correct:
-```shell
-/opt/bitnami/kafka/bin/kafka-topics.sh \
-  --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 \ 
-  --topic event-store \ 
-  --describe
-
-Topic: event-store      TopicId: jOA78GwxQM-WIlg-8aGNJA PartitionCount: 3       ReplicationFactor: 1    Configs: min.insync.replicas=1,segment.bytes=1073741824
-        Topic: event-store      Partition: 0    Leader: 0       Replicas: 0     Isr: 0
-        Topic: event-store      Partition: 1    Leader: 0       Replicas: 0     Isr: 0
-        Topic: event-store      Partition: 2    Leader: 0       Replicas: 0     Isr: 0
-```
-Note: All other topics will be created on demand by the application with a single partition.
-
-If you wish to inspect the messages on the Kafka topic/partition, you can use:
-```shell
-/opt/bitnami/kafka/bin/kafka-console-consumer.sh \
-  --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 \
-  --topic event-store \
-  --from-beginning \
-  --partition 0
+kubectl run kafka-client -n cqrs --rm -ti --image bitnami/kafka:3.4 -- bash
+I have no name!@kafka-client:/$ /opt/bitnami/kafka/bin/kafka-console-consumer.sh --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 --topic event-store --from-beginning --partition 0
 ```
 
 ## Deploying the applications

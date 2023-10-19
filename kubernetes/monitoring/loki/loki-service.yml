@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: loki-service
+  name: loki-svc
   namespace: monitoring
 spec:
   selector:
@@ -17,4 +17,8 @@ spec:
       port: 9096
       targetPort: 9096
       nodePort: 30096
+    - name: cluster
+      protocol: TCP
+      port: 7946
+      targetPort: 7946
   type: NodePort

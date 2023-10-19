@@ -11,4 +11,3 @@ kubectl delete -f tempo-configmap.yml -n monitoring && \
 kubectl delete -f tempo-deployment.yml -n monitoring && \
 kubectl delete -f tempo-service.yml -n monitoring
 ```
-

@@ -1,5 +1,27 @@
 # Prometheus on Kubernetes
 
+```shell
+kubectl apply -f rbac.yml -n monitoring
+```
+
+```shell
+kubectl apply -f prometheus-configmap.yml -n monitoring && \
+kubectl apply -f prometheus-deployment.yml -n monitoring && \
+kubectl apply -f prometheus-service.yml -n monitoring
+```
+
+```shell
+kubectl delete -f prometheus-configmap.yml -n monitoring && \
+kubectl delete -f prometheus-deployment.yml -n monitoring && \
+kubectl delete -f prometheus-service.yml -n monitoring
+```
+
+
+
+
+
+
+
 Create a new Kubernetes namespace for the monitoring stack:
 ```shell
 kubectl create namespace monitoring

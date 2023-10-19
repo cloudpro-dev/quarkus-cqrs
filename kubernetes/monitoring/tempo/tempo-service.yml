@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: tempo-service
+  name: tempo-svc
   namespace: monitoring
 spec:
   selector:
@@ -11,10 +11,8 @@ spec:
       protocol: TCP
       port: 3200
       targetPort: 3200
-      nodePort: 30200
     - name: oltp-grpc
       protocol: TCP
       port: 4317
       targetPort: 4317
-      nodePort: 30317
   type: NodePort

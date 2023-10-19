@@ -12,11 +12,14 @@ data:
       beats {
         port => 5044
       }
+      gelf {
+        port => 12201
+      }
     }
     output {
       stdout { codec => rubydebug }
       loki { 
-        url => "http://loki-service:3100/loki/api/v1/push"
+        url => "http://loki-svc.monitoring.svc.cluster.local:3100/loki/api/v1/push"
         message_field => "message"
       }
     }
