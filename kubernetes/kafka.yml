@@ -71,3 +71,22 @@ spec:
         resources:
           requests:
             storage: "1Gi"
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kafka-init
+spec:
+  template:
+    spec:
+      containers:
+        - name: kafka-client
+          image: docker.io/bitnami/kafka:3.4
+          command: ["/bin/sh"]
+          args:
+            - -c
+            - >-
+              /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 --topic event-store --partitions=3 --create
+              exit 0;
+      restartPolicy: OnFailure
