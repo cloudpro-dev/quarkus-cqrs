@@ -26,4 +26,4 @@ spec:
         - name: config-volume
           configMap:
             name: prometheus-configmap
-            defaultMode: 0640
+            # defaultMode: 0640

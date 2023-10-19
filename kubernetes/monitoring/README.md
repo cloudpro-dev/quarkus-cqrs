@@ -10,9 +10,8 @@ Services should be deployed in the following order:
 1. MinIO
 2. Loki
 3. Logstash
-4. Filebeat
-5. Prometheus
-6. Tempo
-7. Grafana
+4. Prometheus
+5. Tempo
+6. Grafana
 
 See the individual directories for information on how to deploy each of these services.
