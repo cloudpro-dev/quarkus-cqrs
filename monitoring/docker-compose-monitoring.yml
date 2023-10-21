@@ -12,7 +12,7 @@ services:
       - '--enable-feature=exemplar-storage'
     volumes:
       - prometheus_data:/prometheus
-      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
@@ -22,7 +22,7 @@ services:
     image: grafana/tempo:2.1.1
     command: [ "-config.file=/etc/tempo.yml" ]
     volumes:
-      - ./monitoring/tempo/tempo.yml:/etc/tempo.yml
+      - ./tempo/tempo.yml:/etc/tempo.yml
       - tempo_data:/tmp/tempo
     ports:
       - "3200:3200"  # tempo
@@ -36,7 +36,7 @@ services:
     image: grafana/loki:latest
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
-      - ./monitoring/loki/loki.yaml:/etc/loki/local-config.yaml:ro
+      - ./loki/loki.yaml:/etc/loki/local-config.yaml:ro
       - loki_data:/loki
     ports:
       - "3100:3100"
@@ -48,7 +48,7 @@ services:
     environment:
       - LS_JAVA_OPTS=-Xmx3g # Increase heap size
     volumes:
-      - ./monitoring/logstash/gelf.conf:/usr/share/logstash/pipeline/gelf.conf:ro
+      - ./logstash/gelf.conf:/usr/share/logstash/pipeline/gelf.conf:ro
     ports:
       - "12201:12201/udp"
       - "5000:5000"
@@ -106,8 +106,8 @@ services:
       - GF_FEATURE_TOGGLES_ENABLE=tempoSearch traceqlEditor traceToMetrics
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./monitoring/grafana/provisioning/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yml
-      - ./monitoring/grafana/provisioning/dashboards/:/etc/grafana/provisioning/dashboards/
+      - ./grafana/provisioning/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./grafana/provisioning/dashboards/:/etc/grafana/provisioning/dashboards/
     ports:
       - '3005:3000'
     networks:

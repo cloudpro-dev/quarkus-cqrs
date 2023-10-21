@@ -236,11 +236,6 @@ Now you can run the commands script which will execute all the bank account comm
 ./commands.sh
 ```
 
-Set up a new namespace for the monitoring platform:
-```shell
-kubectl create namespace monitoring
-```
-
 # Monitoring
 
 The application provides full observability of the application stack using:
@@ -254,6 +249,17 @@ The Grafana UI can be accessed at http://localhost:3005/ and provides a number o
 - Application Dashboard - Custom dashboard visualising application specific metrics
 - Cadvisor exporter - Show metrics related to all infrastructure containers
 - JVM Quarkus - Shows JVM related metrics for each of the applications
+
+## Docker Setup
+```shell
+docker compose -f ./monitoring/docker-compose-monitoring.yml up -d
+```
+
+### Kubernetes Setup
+Set up a new namespace for the monitoring platform:
+```shell
+/bin/bash -c ./kubernetes/monitoring/setup.sh
+```
 
 Below is more information on each of the specific technologies used to provide observability:
 
@@ -296,6 +302,21 @@ Query Prometheus for the relevant metrics:
 ```shell
 curl 'http://localhost:9090/api/v1/query?query=traces_spanmetrics_latency_bucket'
 {"status":"success","data":{"resultType":"vector","result":[]}}
+```
+
+```shell
+export PROMETHEUS_URL=$(minikube service --url prometheus-svc -n monitoring | head -n 1)
+curl "$PROMETHEUS_URL/api/v1/label/kubernetes_name/values" | jq
+{
+  "status": "success",
+  "data": [
+    "aggregate-view",
+    "event-store",
+    "event-streams",
+    "kube-dns",
+    "view-store"
+  ]
+}
 ```
 
 ### Exemplars
@@ -364,7 +385,6 @@ export AGGREGATE_VIEW_URL=$(minikube service --url aggregate-view -n cqrs | head
 ### Smoke Test
 No additional environment variables are required to run the smoke test as these are single shot requests to the applications.
 ```shell
-cd load-testing
 mvn gatling:test -Dgatling.simulationClass=cqrs.SmokeTestSimulation
 ```
 
@@ -374,6 +394,7 @@ The following environment variables can be used to configure the tests for eithe
 export TARGET_TPS=10
 export TARGET_TPS_DURATION_IN_SECS=30
 export TARGET_TPS_RAMP_PERIOD_IN_SECS=5
+mvn gatling:test -Dgatling.simulationClass=cqrs.TargetLoadSimulation
 ```
 
 ### Spike Test
@@ -383,6 +404,7 @@ export SPIKE_BASE_TPS=10.0
 export SPIKE_RAMP_DURATION=10
 export SPIKE_MAX_TPS=50
 export SPIKE_INTERVAL=10
+mvn gatling:test -Dgatling.simulationClass=cqrs.SpikeTestSimulation
 ```
 
 ### Fatigue Test
@@ -390,16 +412,10 @@ The following environment variables can be used to configure the tests for Fatig
 ```shell
 export FATIGUE_INITIAL_TARGET_TPS=10.0
 export FATIGUE_STEP_TPS_INCREASE=5.0
-export FATIGUE_STEP_DURATION=10L
+export FATIGUE_STEP_DURATION=10
 export FATIGUE_TOTAL_STEP_COUNT=4
+mvn gatling:test -Dgatling.simulationClass=cqrs.FatigueTestSimulation
 ```
-
-When you are ready to run a test you can use the Maven Gatling plugin task:
-```shell
-cd load-testing
-mvn gatling:test -Dgatling.simulationClass=cqrs.SmokeTestSimulation
-```
-
 
 
 
