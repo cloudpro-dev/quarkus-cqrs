@@ -46,28 +46,27 @@ data:
             timeShiftEnabled: false
             spanEndTimeShift: ""
             spanStartTimeShift: ""
-          traceToMetrics:
+          tracesToMetrics:
             datasourceUid: e4e0224e-c538-4ae6-9468-dbcdb40209c0
-            spanStartTimeShift: "-1h"
-            spanEndTimeShift: "+1h"
-            tags: [ { key: "instance" } ]
             queries:
-              - name: "Sample query"
-                query: "sum(rate(traces_spanmetrics_latency_bucket{$__tags}[5m]))"
-          #        queries: [
-          #          { name: "Request rate", query: "rate(request_total{$__tags}[5m])" },
-          #          { name: "Error rate", query: "rate(errors_total{$__tags}[5m])" },
-          #          { name: "P90 Latency", query: "histogram(quantile(0.9, sum(rate(request_seconds{$__tags}[5m])) by (le))" }
-          #        ]
+              - name: Sample query
+                query: sum(rate(traces_spanmetrics_latency_bucket{}[5m]))
+            spanEndTimeShift: "+1h"
+            spanStartTimeShift: "-1h"
+            tags:
+              - key: instance
+                value: ''
           tracesToLogsV2:
             customQuery: true
             datasourceUid: 82d6c268-7337-45af-aa2d-2d509cd46bef
-            spanStartTimeShift: "-1m"
-            spanEndTimeShift: "+1m"
-            tags: [ "traceId" ]
-            query: "{$${__tags}}"
-            filterByTraceID: false
             filterBySpanID: false
+            filterByTraceID: false
+            query: "{$${__tags}}"
+            spanEndTimeShift: "+1m"
+            spanStartTimeShift: "-1m"
+            tags:
+              - key: traceId
+                value: ''
           nodeGraph:
             enabled: true
           search:

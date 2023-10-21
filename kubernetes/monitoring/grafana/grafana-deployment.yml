@@ -31,7 +31,7 @@ spec:
           - 0
       containers:
         - name: grafana
-          image: grafana/grafana:9.1.0
+          image: grafana/grafana:9.5.3
           imagePullPolicy: Always
           env:
             # Minio access key and secret key
@@ -70,8 +70,6 @@ spec:
             items:
               - key: default.yaml
                 path: default.yaml
-              - key: cadvisor.json
-                path: cadvisor.json
               - key: apm.json
                 path: apm.json
               - key: application.json

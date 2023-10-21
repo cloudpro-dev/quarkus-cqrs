@@ -11,12 +11,10 @@ spec:
       protocol: TCP
       port: 3100
       targetPort: 3100
-      nodePort: 30100
     - name: grpc
       protocol: TCP
       port: 9096
       targetPort: 9096
-      nodePort: 30096
     - name: cluster
       protocol: TCP
       port: 7946
