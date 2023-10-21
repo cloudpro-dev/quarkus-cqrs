@@ -1,0 +1,22 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: logstash-svc
+  namespace: monitoring
+spec:
+  selector:
+    app: logstash
+  ports:
+    - name: filebeat
+      protocol: TCP
+      port: 5044
+      targetPort: 5044
+    - name: gelf
+      protocol: UDP
+      port: 12201
+      targetPort: 12201
+    - name: api
+      protocol: TCP
+      port: 9600
+      targetPort: 9600
+  type: NodePort

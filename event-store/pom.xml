@@ -31,6 +31,10 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-jdbc-postgresql</artifactId>
     </dependency>
+    <dependency>
+      <groupId>io.opentelemetry.instrumentation</groupId>
+      <artifactId>opentelemetry-jdbc</artifactId>
+    </dependency>
   </dependencies>
 
   <profiles>
@@ -43,5 +47,5 @@
       </properties>
     </profile>
   </profiles>
-  
+
 </project>

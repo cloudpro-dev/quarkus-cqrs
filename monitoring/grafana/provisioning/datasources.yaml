@@ -1,0 +1,88 @@
+apiVersion: 1
+
+# list of datasources that should be deleted from the database
+deleteDatasources:
+  - name: Prometheus
+    orgId: 1
+  - name: Tempo
+    orgId: 1
+  - name: Loki
+    orgId: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    uid: e4e0224e-c538-4ae6-9468-dbcdb40209c0
+    access: proxy
+    orgId: 1
+    url: http://prometheus:9090
+    basicAuth: false
+    isDefault: true
+    version: 1
+    editable: true
+    jsonData:
+      httpMethod: POST
+      defaultEditor: code
+      prometheusType: Prometheus
+      prometheusVersion: 2.40.1
+  - name: Tempo
+    type: tempo
+    uid: 337b05fb-0159-4229-b9ce-ca151182522f
+    access: proxy
+    orgId: 1
+    url: http://tempo:3200
+    basicAuth: false
+    isDefault: false
+    editable: true
+    jsonData:
+      traceQuery:
+        timeShiftEnabled: false
+        spanEndTimeShift: ""
+        spanStartTimeShift: ""
+      traceToMetrics:
+        datasourceUid: e4e0224e-c538-4ae6-9468-dbcdb40209c0
+        spanStartTimeShift: "-1h"
+        spanEndTimeShift: "+1h"
+        tags: [ { key: "instance" } ]
+        queries:
+          - name: "Sample query"
+            query: "sum(rate(traces_spanmetrics_latency_bucket{$__tags}[5m]))"
+#        queries: [
+#          { name: "Request rate", query: "rate(request_total{$__tags}[5m])" },
+#          { name: "Error rate", query: "rate(errors_total{$__tags}[5m])" },
+#          { name: "P90 Latency", query: "histogram(quantile(0.9, sum(rate(request_seconds{$__tags}[5m])) by (le))" }
+#        ]
+      tracesToLogsV2:
+        customQuery: true
+        datasourceUid: 82d6c268-7337-45af-aa2d-2d509cd46bef
+        spanStartTimeShift: "-1m"
+        spanEndTimeShift: "+1m"
+        tags: ["traceId"]
+        query: "{$${__tags}}"
+        filterByTraceID: false
+        filterBySpanID: false
+      nodeGraph:
+        enabled: true
+      search:
+        hide: false
+      lokiSearch:
+        datasourceUid: 82d6c268-7337-45af-aa2d-2d509cd46bef
+      serviceMap:
+        datasourceUid: e4e0224e-c538-4ae6-9468-dbcdb40209c0
+      #      spanBar:
+      #        type: Duration
+      spanBar:
+        type: "Tag"
+        tag: "http.path"
+  - name: Loki
+    type: loki
+    access: proxy
+    orgId: 1
+    url: http://loki:3100
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: true
+    apiVersion: 1
+    database: ""
+    uid: 82d6c268-7337-45af-aa2d-2d509cd46bef
