@@ -15,10 +15,21 @@ data:
         port => 12201
       }
     }
+    filter {
+      mutate {
+        add_field => {
+          "cluster" => "minikube"
+          "env" => "dev"
+          "job" => "logstash"
+        }
+        replace => { "message" => "%{Severity} [%{traceId},%{spanId}] --- [%{Thread}] %{message}" }
+      }
+    }
     output {
-      stdout { codec => rubydebug }
+      # stdout { codec => rubydebug }
       loki { 
         url => "http://loki-svc.monitoring.svc.cluster.local:3100/loki/api/v1/push"
         message_field => "message"
+        include_fields => ["cluster","env","job","host"]
       }
     }

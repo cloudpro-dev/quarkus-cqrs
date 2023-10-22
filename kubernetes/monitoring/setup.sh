@@ -4,7 +4,6 @@ kubectl create namespace monitoring && \
 # MinIO
 kubectl apply -f ./minio/minio-deployment.yml -n monitoring && \
 kubectl apply -f ./minio/minio-service.yml -n monitoring && \
-kubectl apply -f ./minio/minio-job.yml -n monitoring && \
 
 # Loki
 kubectl apply -f ./loki/loki-configmap.yml -n monitoring && \
