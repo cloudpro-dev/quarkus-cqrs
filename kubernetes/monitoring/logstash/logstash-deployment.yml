@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: logstash
-          image: grafana/logstash-output-loki:2.8.2-amd64
+          image: grafana/logstash-output-loki:2.8.6-amd64
           ports:
             - containerPort: 5044 # Filebeat
             - containerPort: 9600 # API

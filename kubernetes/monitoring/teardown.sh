@@ -28,3 +28,5 @@ kubectl delete -f ./grafana/grafana-configmap.yml -n monitoring && \
 kubectl delete -f ./grafana/grafana-dashboards.yml -n monitoring && \
 kubectl delete -f ./grafana/grafana-deployment.yml -n monitoring && \
 kubectl delete -f ./grafana/grafana-service.yml -n monitoring
+
+kubectl delete namespace monitoring

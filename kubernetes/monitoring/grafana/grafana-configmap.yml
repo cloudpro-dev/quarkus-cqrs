@@ -52,10 +52,10 @@ data:
               - name: Rate
                 query: sum(rate(http_server_requests_seconds_count{$$__tags}[$$__rate_interval]))
               - name: Duration (Sum)
-                query: sum(rate(http_server_requests_seconds_sum{$$__tags, status!~"5.."}[$__rate_interval]))/sum(rate(http_server_requests_seconds_count{$$__tags,
+                query: sum(rate(http_server_requests_seconds_sum{$$__tags, status!~"5.."}[$$__rate_interval]))/sum(rate(http_server_requests_seconds_count{$$__tags,
                   status!~"5.."}[$$__rate_interval]))
               - name: Duration (Max)
-                query: max(http_server_requests_seconds_max{$$__tags, status!~"5.."}[$$__rate_interval])
+                query: max(http_server_requests_seconds_max{$$__tags, status!~"5.."})
             spanEndTimeShift: "+1h"
             spanStartTimeShift: "-1h"
             tags:
