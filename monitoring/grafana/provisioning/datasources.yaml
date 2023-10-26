@@ -39,28 +39,30 @@ datasources:
         timeShiftEnabled: false
         spanEndTimeShift: ""
         spanStartTimeShift: ""
-      traceToMetrics:
+      tracesToMetrics:
         datasourceUid: e4e0224e-c538-4ae6-9468-dbcdb40209c0
-        spanStartTimeShift: "-1h"
-        spanEndTimeShift: "+1h"
-        tags: [ { key: "instance" } ]
         queries:
-          - name: "Sample query"
-            query: "sum(rate(traces_spanmetrics_latency_bucket{$__tags}[5m]))"
-#        queries: [
-#          { name: "Request rate", query: "rate(request_total{$__tags}[5m])" },
-#          { name: "Error rate", query: "rate(errors_total{$__tags}[5m])" },
-#          { name: "P90 Latency", query: "histogram(quantile(0.9, sum(rate(request_seconds{$__tags}[5m])) by (le))" }
-#        ]
+          - name: Rate
+            query: sum(rate(http_server_requests_seconds_count{$$__tags}[$$__rate_interval]))
+          - name: Duration (Sum)
+            query: sum(rate(http_server_requests_seconds_sum{$$__tags, status!~"5.."}[$$__rate_interval]))/sum(rate(http_server_requests_seconds_count{$$__tags,
+              status!~"5.."}[$$__rate_interval]))
+          - name: Duration (Max)
+            query: max(http_server_requests_seconds_max{$$__tags, status!~"5.."})
+        spanEndTimeShift: "+1h"
+        spanStartTimeShift: "-1h"
+        tags:
+          - key: service.name
+            value: job
       tracesToLogsV2:
         customQuery: true
         datasourceUid: 82d6c268-7337-45af-aa2d-2d509cd46bef
-        spanStartTimeShift: "-1m"
-        spanEndTimeShift: "+1m"
-        tags: ["traceId"]
-        query: "{$${__tags}}"
-        filterByTraceID: false
         filterBySpanID: false
+        filterByTraceID: false
+        query: '{env=~".+"}  |= "$${__trace.traceId}" |= "$${__span.spanId}"'
+        spanEndTimeShift: "+1m"
+        spanStartTimeShift: "-1m"
+        tags: []
       nodeGraph:
         enabled: true
       search:
@@ -69,8 +71,6 @@ datasources:
         datasourceUid: 82d6c268-7337-45af-aa2d-2d509cd46bef
       serviceMap:
         datasourceUid: e4e0224e-c538-4ae6-9468-dbcdb40209c0
-      #      spanBar:
-      #        type: Duration
       spanBar:
         type: "Tag"
         tag: "http.path"
@@ -85,4 +85,11 @@ datasources:
     editable: true
     apiVersion: 1
     database: ""
+    jsonData:
+      derivedFields:
+        - datasourceUid: 337b05fb-0159-4229-b9ce-ca151182522f
+          matcherRegex: ".+\\[(.+?),.+\\].+"
+          name: traceId
+          url: "$${__value.raw}"
     uid: 82d6c268-7337-45af-aa2d-2d509cd46bef
+

@@ -13,20 +13,19 @@ metrics_generator:
     span_metrics:
       dimensions:
         - http.method
-#        - http.target
-#        - http.status_code
+        - http.target
+        - http.status_code
         - service.version
     service_graphs:
       dimensions:
         - http.method
-#        - http.target
-#        - http.status_code
+        - http.target
+        - http.status_code
         - service.version
   registry:
     collection_interval: 5s
     external_labels:
       source: tempo
-      cluster: docker-compose
   storage:
     path: /tmp/tempo/generator/wal
     remote_write:
@@ -35,11 +34,15 @@ metrics_generator:
 
 storage:
   trace:
-    backend: local
+    backend: s3                        # backend configuration to use
     wal:
-      path: /tmp/tempo/wal
-    local:
-      path: /tmp/tempo/blocks
+      path: /tmp/tempo/wal             # where to store the the wal locally
+    s3:
+      bucket: tempo                    # how to store data in s3
+      endpoint: minio:9000
+      access_key: minioadmin
+      secret_key: minioadmin
+      insecure: true
 
 overrides:
   metrics_generator_processors: [service-graphs, span-metrics] # enables metrics generator

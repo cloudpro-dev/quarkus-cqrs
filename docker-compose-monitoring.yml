@@ -12,7 +12,7 @@ services:
       - '--enable-feature=exemplar-storage'
     volumes:
       - prometheus_data:/prometheus
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
@@ -22,7 +22,7 @@ services:
     image: grafana/tempo:2.2.4
     command: [ "-config.file=/etc/tempo.yml" ]
     volumes:
-      - ./tempo/tempo.yml:/etc/tempo.yml
+      - ./monitoring/tempo/tempo.yml:/etc/tempo.yml
       - tempo_data:/tmp/tempo
     ports:
       - "3200:3200"  # tempo
@@ -31,12 +31,13 @@ services:
       - cqrs
     depends_on:
       - prometheus
+      - minio-init
 
   loki:
     image: grafana/loki:2.8.6
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
-      - ./loki/loki.yaml:/etc/loki/local-config.yaml:ro
+      - ./monitoring/loki/loki.yaml:/etc/loki/local-config.yaml:ro
       - loki_data:/loki
     ports:
       - "3100:3100"
@@ -48,7 +49,7 @@ services:
     environment:
       - LS_JAVA_OPTS=-Xmx3g # Increase heap size
     volumes:
-      - ./logstash/gelf.conf:/usr/share/logstash/pipeline/gelf.conf:ro
+      - ./monitoring/logstash/gelf.conf:/usr/share/logstash/pipeline/gelf.conf:ro
     ports:
       - "12201:12201/udp"
       - "5000:5000"
@@ -65,20 +66,26 @@ services:
       - "9001:9001"
     networks:
       - cqrs
-    command: server ~ --address ':9000' --console-address ':9001'
+    command: server /data --address ':9000' --console-address ':9001'
+    volumes:
+      - minio_data:/data
 
   minio-init:
-    image: minio/mc
+    image: minio/mc:RELEASE.2023-10-24T21-42-22Z
+    environment:
+      - MC_HOST_minio=http://minioadmin:minioadmin@minio:9000
     networks:
       - cqrs
     depends_on:
       - minio
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
-      /usr/bin/mc rm -r --force myminio/loki;
-      /usr/bin/mc mb myminio/loki;
-      /usr/bin/mc policy set public myminio/loki;
+      /usr/bin/mc rm -r --force minio/loki;
+      /usr/bin/mc mb minio/loki;
+      /usr/bin/mc anonymous set public minio/loki;
+      /usr/bin/mc rm -r --force minio/tempo;
+      /usr/bin/mc mb minio/tempo;
+      /usr/bin/mc anonymous set public minio/tempo;
       exit 0;
       "
 
@@ -106,8 +113,8 @@ services:
       - GF_FEATURE_TOGGLES_ENABLE=tempoSearch traceqlEditor traceToMetrics
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./grafana/provisioning/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yml
-      - ./grafana/provisioning/dashboards/:/etc/grafana/provisioning/dashboards/
+      - ./monitoring/grafana/provisioning/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./monitoring/grafana/provisioning/dashboards/:/etc/grafana/provisioning/dashboards/
     ports:
       - '3005:3000'
     networks:
@@ -123,6 +130,7 @@ volumes:
   prometheus_data:
   tempo_data:
   loki_data:
+  minio_data:
 
 networks:
   cqrs:
