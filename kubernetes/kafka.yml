@@ -7,9 +7,9 @@ metadata:
 spec:
   clusterIP: None
   ports:
-    - name: '9092'
-      port: 9092
+    - name: 'PLAINTEXT'
       protocol: TCP
+      port: 9092
       targetPort: 9092
   selector:
     app: kafka-app
@@ -22,8 +22,6 @@ metadata:
     app: kafka-app
 spec:
   serviceName: kafka-svc
-#  replicas: 3
-  replicas: 1
   selector:
     matchLabels:
       app: kafka-app
@@ -34,34 +32,38 @@ spec:
     spec:
       containers:
         - name: kafka-container
-          image: doughgle/kafka-kraft
+          image: docker.io/bitnami/kafka:3.6
           ports:
             - containerPort: 9092
             - containerPort: 9093
           env:
-#            - name: REPLICAS
-#              value: '3'
-            - name: REPLICAS
+            - name: KAFKA_ENABLE_KRAFT
+              value: 'yes'
+            - name: KAFKA_CFG_NODE_ID
               value: '1'
-            - name: SERVICE
-              value: kafka-svc
-            - name: NAMESPACE
-              value: cqrs
-            - name: SHARE_DIR
-              value: /mnt/kafka
-            - name: CLUSTER_ID
-              value: oh-sxaDRTcyAr6pFRbXyzA
-#            - name: DEFAULT_REPLICATION_FACTOR
-#              value: '3'
-#            - name: DEFAULT_MIN_INSYNC_REPLICAS
-#              value: '2'
-            - name: DEFAULT_REPLICATION_FACTOR
+            - name: KAFKA_CFG_PROCESS_ROLES
+              value: 'broker,controller'
+            - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
+              value: 'CONTROLLER'
+            - name: KAFKA_CFG_LISTENERS
+              value: 'PLAINTEXT://:9092,CONTROLLER://:9093'
+            - name: KAFKA_INTER_BROKER_LISTENER_NAME
+              value: 'PLAINTEXT'
+            - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
+              value: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
+            - name: KAFKA_CFG_ADVERTISED_LISTENERS
+              value: 'PLAINTEXT://kafka-svc:9092'
+            - name: KAFKA_CFG_BROKER_ID
               value: '1'
-            - name: DEFAULT_MIN_INSYNC_REPLICAS
-              value: '1'
+            - name: KAFKA_CFG_CONTROLLER_QUORUM_VOTERS
+              value: '1@kafka-svc:9093'
+            - name: ALLOW_PLAINTEXT_LISTENER
+              value: 'yes'
+            - name: KAFKA_KRAFT_CLUSTER_ID
+              value: 'r4zt_wrqTRuT7W2NJsB_GA'
           volumeMounts:
             - name: data
-              mountPath: /mnt/kafka
+              mountPath: /bitnami/kafka
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -82,7 +84,7 @@ spec:
     spec:
       containers:
         - name: kafka-client
-          image: docker.io/bitnami/kafka:3.4
+          image: docker.io/bitnami/kafka:3.6
           command: ["/bin/sh"]
           args:
             - -c

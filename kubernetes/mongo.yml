@@ -65,7 +65,7 @@ spec:
         app: mongo
     spec:
       containers:
-        - image: docker.io/bitnami/mongodb:4.4
+        - image: docker.io/bitnami/mongodb:7.0
           name: mongo
 #          args: ["--dbpath","/data/db"]
           env:
