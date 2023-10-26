@@ -71,6 +71,37 @@ A set of custom Grafana dashboards visualise logs, metrics and telemetry for the
 
 ![Application dashboard](/home/geek/Workspace/quarkus-cqrs/images/grafana-application-dashboard.png)
 
+### Grafana Setup
+Grafana has a full set of configured data sources with linking to allow the full use of the following features:
+
+#### Service graphs
+Service graphs visually map the request between the services in the project and including timing and error rate information.
+
+![Service graph](./images/grafana-tempo-service-graph.png)
+
+#### Node graphs
+Node graphs visually map the calls and timings between the various service and infrastructure for a specific action.
+
+![Node graph](./images/grafana-tempo-node-graph.png)
+
+#### Trace to Log
+Telemetry is linked back to the associated log entry using the MDC information (traceId/spanId) present in the log line
+entries.  This allows you to see the log messages happening at the time the telemetry data was logged.
+
+![Trace to logs](./images/grafana-tempo-trace2log.png)
+
+#### Log to trace
+Logs are correlated with telemetry data using MDC information (traceId/spanId) to allow you to jump straight from a 
+single log entry to the telemetry data associated with the activity.
+
+![Log to trace](./images/grafana-tempo-log2trace.png)
+
+#### Trace to Metrics
+Telemetry is also associated with the metrics collected from the application within a certain time frame, this gives
+context to a single telemetry entry as you can see if the data was just a glitch or whether it was part of a larger increase in the response times.
+
+![Log to trace](./images/grafana-tempo-trace2metrics.png)
+
 ## Deployment
 
 The applications and associated monitoring stack have deployment profiles for Kubernetes.
@@ -366,7 +397,7 @@ Now you can run the commands script which will execute all the bank account comm
 ```shell
 ./commands.sh
 ```
-
+cd 
 # Monitoring
 
 The application provides full observability of the application stack using:
