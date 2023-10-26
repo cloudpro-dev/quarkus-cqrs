@@ -8,9 +8,6 @@ data:
     path.config: /usr/share/logstash/pipeline
   logstash.conf: |
     input {
-      beats {
-        port => 5044
-      }
       gelf {
         port => 12201
       }

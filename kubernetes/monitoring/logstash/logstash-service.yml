@@ -7,10 +7,6 @@ spec:
   selector:
     app: logstash
   ports:
-    - name: filebeat
-      protocol: TCP
-      port: 5044
-      targetPort: 5044
     - name: gelf
       protocol: UDP
       port: 12201

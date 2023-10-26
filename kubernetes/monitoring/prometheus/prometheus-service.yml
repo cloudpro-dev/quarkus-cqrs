@@ -7,7 +7,6 @@ spec:
     app: prometheus
   ports:
     - name: prometheus-ui
-      nodePort: 30900
       protocol: TCP
       port: 9090
       targetPort: 9090
