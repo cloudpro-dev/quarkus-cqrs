@@ -9,7 +9,7 @@ Using the Command and Query Responsibility Segregation (CQRS) design pattern to 
 ## Overview
 The project uses four different applications to provide all the necessary services for both the customers and business users.
 
-![Overview](/home/geek/Workspace/quarkus-cqrs/images/quarkus-cqrs-overview.png)
+![Overview](./images/quarkus-cqrs-overview.png)
 
 ### Event Store
 Provides an API for write (command) operations including account creation and update, deposits and withdrawals.
@@ -25,7 +25,7 @@ Provides a real-time view of the aggregated data on accounts to the business.
 
 ## Technologies
 
-![Technologies](/home/geek/Workspace/quarkus-cqrs/images/quarkus-cqrs-apps.png)
+![Technologies](./images/quarkus-cqrs-apps.png)
 
 Some of the main technologies this project demonstrates are:
 - Quarkus - This project uses Quarkus, the Supersonic Subatomic Java Framework.
@@ -43,19 +43,19 @@ Kafka provides the backbone of the project receiving and transmitting events to 
 
 The Event Store emits events into partitions within the Kafka Topic based on the customer account identifier.  This guarantees the order of the messages is retained on the consumer side. 
 
-![Kafka Producers](/home/geek/Workspace/quarkus-cqrs/images/quarkus-cqrs-kafka-producers.png)
+![Kafka Producers](./images/quarkus-cqrs-kafka-producers.png)
 
 ### Consumers
 
 The View Store reads events from the Kafka Topic partitions using either a single consumer or multiple consumer in a scaled setup. 
 
-![](/home/geek/Workspace/quarkus-cqrs/images/quarkus-cqrs-Kafka-consumers.png)
+![Kafka Consumers](./images/quarkus-cqrs-kafka-consumers.png)
 
 ## Observability
 
 This project provides a fully configured monitoring stack for monitoring the applications during operation.
 
-![Monitoring Setup](/home/geek/Workspace/quarkus-cqrs/images/cqrs-monitoring.png)
+![Monitoring Setup](./images/cqrs-monitoring.png)
 
 - Metrics - Metrics are published by each app using Micrometer which is polled by a Prometheus instance
 - Telemetry - Telemetry is pushed from each application using OpenTelemetry to a Tempo instance
@@ -69,7 +69,7 @@ A set of custom Grafana dashboards visualise logs, metrics and telemetry for the
 - Application Dashboard - Custom dashboard visualising application specific metrics
 - JVM Quarkus - Shows JVM related metrics for each of the applications
 
-![Application dashboard](/home/geek/Workspace/quarkus-cqrs/images/grafana-application-dashboard.png)
+![Application dashboard](./images/grafana-application-dashboard.png)
 
 ### Grafana Setup
 Grafana has a full set of configured data sources with linking to allow the full use of the following features:
@@ -106,7 +106,7 @@ context to a single telemetry entry as you can see if the data was just a glitch
 
 The applications and associated monitoring stack have deployment profiles for Kubernetes.
 
-![](/home/geek/Workspace/quarkus-cqrs/images/cqrs-deployment.png)
+![Application Deployment](./images/cqrs-deployment.png)
 
 ## Load testing
 
@@ -119,11 +119,11 @@ performance under different load conditions.
 - Spike Test - Proves the application can handle traffic spikes
 - Fatigue Test - Used to show the maximum traffic an application can handle before breaking
 
-![Load Testing](/home/geek/Workspace/quarkus-cqrs/images/cqrs-load-testing.png)
+![Load Testing](./images/cqrs-load-testing.png)
 
 Results are published by Galting to to HTML reports:
 
-![](/home/geek/Workspace/quarkus-cqrs/images/load-testing-gatling-results.png)
+![Load Testing Results](./images/load-testing-gatling-results.png)
 
 # Development
 
