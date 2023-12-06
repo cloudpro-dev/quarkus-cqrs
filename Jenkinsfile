@@ -1,9 +1,9 @@
 pipeline {
     agent any
     stages {
-        stage('Build'){
+        stage('Load Test'){
             steps {
-                sh(label: 'Maven build', script: "./mvnw clean test")
+                sh(label: 'Maven build', script: "./load-testing/mvnw gatling:test -Dgatling.simulationClass=cqrs.SmokeTestSimulation")
             }
             post {
                 always {
