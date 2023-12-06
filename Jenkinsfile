@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Load Test'){
             steps {
-                sh(label: 'Maven build', script: "mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.simulationClass=cqrs.SmokeTestSimulation")
+                sh(label: 'Maven build', script: "./mvnw -f./load-testing/pom.xml gatling:test -Dgatling.simulationClass=cqrs.SmokeTestSimulation")
             }
             post {
                 always {
