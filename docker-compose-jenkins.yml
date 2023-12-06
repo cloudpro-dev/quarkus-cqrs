@@ -1,0 +1,34 @@
+#  docker compose -f docker-compose-jenkins.yml up -d --build --force-recreate
+services:
+  jenkins:
+    build: ./jenkins/controller
+    restart: always
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins-data:/var/jenkins_home:rw
+      # - ./jenkins/casc.d:/var/jenkins_home/casc.d/:ro
+      # Mounting the ssh private key as "container secret" makes it available in JCasc as the variable ${SSH_AGENT_KEY}
+      - ./jenkins/secrets/id_jenkins.pem:/run/secrets/SSH_AGENT_KEY:ro
+      # Mount the project locally to the Jenkins server
+      - .:/var/repo/code
+    environment:
+      - JENKINS_EXT_URL=http://localhost:8080
+      # - CASC_JENKINS_CONFIG=/var/jenkins_home/casc.d/
+      - org.jenkinsci.plugins.durabletask.BourneShellScript.LAUNCH_DIAGNOSTICS=true
+      - PUBLIC_IP
+      - JAVA_OPTS=-Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true
+  jenkins-agent:
+    platform: linux/amd64
+    build: ./jenkins/agent
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - jenkins-agent-data:/home/jenkins:rw
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+    environment:
+      - JENKINS_AGENT_SSH_PUBKEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBpNqXQ4x7fPPUBbYPxKF77Zqq6d35iPCD2chg644OUD noone@localhost.local
+volumes:
+  jenkins-data:
+  jenkins-agent-data:
