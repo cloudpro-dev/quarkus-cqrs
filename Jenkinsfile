@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Build'){
             steps {
-                sh(label: 'Maven build', script: "./mvnw clean")
+                sh(label: 'Maven build', script: "./mvnw clean test")
             }
             post {
                 always {
