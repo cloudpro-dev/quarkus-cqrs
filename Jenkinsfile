@@ -169,39 +169,40 @@ pipeline {
                     parallel testGroups
                 }
             }
-        }
-    }
+            post {
+                always {
+                    script {
+                        def now = new Date()
+                        def dt = now.format("yyyyMMddHHmm", TimeZone.getTimeZone("UTC"))
 
-    post {
-        always {
-            script {
-                def now = new Date()
-                def dt = now.format("yyyyMMddHHmm", TimeZone.getTimeZone("UTC"))
+                        // make gradlew executable after SCM checkout
+                        sh "chmod +x ./mvnw"
 
-                // make gradlew executable after SCM checkout
-                sh "chmod +x ./mvnw"
+                        // clean previous runs
+                        sh "./mvnw clean"
 
-                // clean previous runs
-                sh "./mvnw clean"
+                        // unstash results from runners
+                        script {
+                            for (int i = 0; i < numberOfTestNodes; i++) {
+                                def num = i
+                                // unpacks to same directory on host
+                                unstash "node $i"
+                            }
+                        }
+                        // build reports
+                        sh "./mvnw -f./load-testing/pom.xml gatling:test -Dgatling.reportsOnly"
 
-                // unstash results from runners
-                script {
-                    for (int i = 0; i < numberOfTestNodes; i++) {
-                        def num = i
-                        // unpacks to same directory on host
-                        unstash "node $i"
+                        // move results to a directory containing a dash (required by Gatling archiver)
+                        sh "mv build/reports ${env.TEST_NAME}-${dt}"
+
+                        // archive the Gatling reports in Jenkins
+                        gatlingArchive()
                     }
                 }
-                // build reports
-                sh "./mvnw -f./load-testing/pom.xml gatling:test -Dgatling.reportsOnly"
-
-                // move results to a directory containing a dash (required by Gatling archiver)
-                sh "mv build/reports ${env.TEST_NAME}-${dt}"
-
-                // archive the Gatling reports in Jenkins
-                gatlingArchive()
             }
         }
     }
+
+
 
 }
