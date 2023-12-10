@@ -5,10 +5,36 @@ jenkins:
         launcher:
           ssh:
             credentialsId: "jenkins-agent-ssh-key"
-            host: "jenkins-agent"
+            host: "jenkins-agent-1"
             port: 22
             sshHostKeyVerificationStrategy: "nonVerifyingKeyVerificationStrategy"
-        name: "jenkins-agent"
+        name: "jenkins-agent-1"
+        nodeDescription: "SSH agent used to execute builds"
+        numExecutors: 4
+        remoteFS: "/home/jenkins"
+        retentionStrategy: "always"
+    - permanent:
+        labelString: "docker linux"
+        launcher:
+          ssh:
+            credentialsId: "jenkins-agent-ssh-key"
+            host: "jenkins-agent-2"
+            port: 22
+            sshHostKeyVerificationStrategy: "nonVerifyingKeyVerificationStrategy"
+        name: "jenkins-agent-2"
+        nodeDescription: "SSH agent used to execute builds"
+        numExecutors: 4
+        remoteFS: "/home/jenkins"
+        retentionStrategy: "always"
+    - permanent:
+        labelString: "docker linux"
+        launcher:
+          ssh:
+            credentialsId: "jenkins-agent-ssh-key"
+            host: "jenkins-agent-3"
+            port: 22
+            sshHostKeyVerificationStrategy: "nonVerifyingKeyVerificationStrategy"
+        name: "jenkins-agent-3"
         nodeDescription: "SSH agent used to execute builds"
         numExecutors: 4
         remoteFS: "/home/jenkins"
