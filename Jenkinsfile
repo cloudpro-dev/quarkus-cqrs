@@ -154,13 +154,13 @@ pipeline {
                                 // make gradlew executable after SCM checkout
                                 sh "chmod +x ./mvnw"
                                 // build project up-front
-                                sh "./mvnw -f./load-testing/pom.xml clean gatling:package"
+                                sh "./mvnw -f ./load-testing/pom.xml clean gatling:package"
                                 // let others know we are ready
                                 count++
                                 // wait until everyone is ready
                                 waitUntil { count == numberOfTestNodes }
                                 // execute the Gatling load test
-                                sh(label: 'Run Gatling Scripts', script:  "./mvnw -f./load-testing/pom.xml gatling:test -DnoReports=true -Dgatling.simulationClass=${env.SIMULATION_CLASS}")
+                                sh(label: 'Run Gatling Scripts', script:  "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.noReports=true -Dgatling.simulationClass=${env.SIMULATION_CLASS}")
                                 // store the results for the master node to read later
                                 stash name: "node $num", includes: '**/simulation.log'
                             }
@@ -190,7 +190,7 @@ pipeline {
                             }
                         }
                         // build reports
-                        sh "./mvnw -f./load-testing/pom.xml gatling:test -Dgatling.reportsOnly"
+                        sh "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.reportsOnly=true"
 
                         // move results to a directory containing a dash (required by Gatling archiver)
                         sh "mv build/reports ${env.TEST_NAME}-${dt}"
