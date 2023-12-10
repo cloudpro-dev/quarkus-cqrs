@@ -154,7 +154,7 @@ pipeline {
                                 // make gradlew executable after SCM checkout
                                 sh "chmod +x ./mvnw"
                                 // build project up-front
-                                sh "./mvnw -f./load-testing/pom.xml clean gatling:gatlingPackage"
+                                sh "./mvnw -f./load-testing/pom.xml clean gatling:package"
                                 // let others know we are ready
                                 count++
                                 // wait until everyone is ready
