@@ -148,13 +148,13 @@ pipeline {
                         testGroups["node $num"] = {
                             node("jenkins-agent-$agentno") {
                                 // delete existing directory on node
-                                // deleteDir()
+                                deleteDir()
                                 // checkout code from SCM
                                 checkout scm
                                 // make gradlew executable after SCM checkout
                                 sh "chmod +x ./mvnw"
                                 // build project up-front
-                                sh "./mvnw -f ./load-testing/pom.xml gatling:package"
+                                sh "./mvnw -f ./load-testing/pom.xml clean gatling:package"
                                 // let others know we are ready
                                 count++
                                 // wait until everyone is ready
