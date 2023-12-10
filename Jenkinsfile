@@ -148,7 +148,7 @@ pipeline {
                         testGroups["node $num"] = {
                             node("jenkins-agent-$agentno") {
                                 // delete existing directory on node
-                                deleteDir()
+                                // deleteDir()
                                 // checkout code from SCM
                                 checkout scm
                                 // make gradlew executable after SCM checkout
