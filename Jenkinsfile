@@ -165,8 +165,9 @@ pipeline {
                                 sh(label: 'Run Gatling Scripts', script:  "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.noReports=true -Dgatling.simulationClass=${env.SIMULATION_CLASS}")
 
                                 sh "pwd"
+                                sh "rm -rf test-results"
                                 sh "mkdir test-results"
-                                sh "cp **/simulation.log test-results"
+                                sh "find . -name \*.log -exec cp '{}' test-results \;"
 
                                 // store the results for the master node to read later
                                 stash name: "node $num", includes: '**/simulation.log'
