@@ -86,6 +86,8 @@ pipeline {
         stage("Setup") {
             steps {
                 script {
+
+
                     env.EVENT_STORE_URL = "${eventStoreUrl}"
                     env.VIEW_STORE_URL = "${viewStoreUrl}"
                     env.AGGREGATE_VIEW_URL = "${aggregateViewUrl}"
@@ -161,6 +163,12 @@ pipeline {
                                 waitUntil { count == numberOfTestNodes }
                                 // execute the Gatling load test
                                 sh(label: 'Run Gatling Scripts', script:  "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.noReports=true -Dgatling.simulationClass=${env.SIMULATION_CLASS}")
+
+                                // TODO rename whatever runid directory has been generated e.g. "smoketestsimulation-20231210225814566" to "true" before stash
+
+                                sh "mkdir test-results"
+                                sh "cp **/simulation.log test-results"
+
                                 // store the results for the master node to read later
                                 stash name: "node $num", includes: '**/simulation.log'
                             }
@@ -189,8 +197,11 @@ pipeline {
                                 unstash "node $i"
                             }
                         }
+
+                        // TODO without the Gatling Run ID, report will be read from "/home/jenkins/workspace/LoadTestJob/load-testing/target/gatling/true"
+
                         // build reports
-                        sh "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.reportsOnly=true"
+                        sh "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.reportsOnly=folderName"
 
                         // move results to a directory containing a dash (required by Gatling archiver)
                         sh "mv build/reports ${env.TEST_NAME}-${dt}"
