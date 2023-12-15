@@ -169,7 +169,7 @@ pipeline {
                                 sh "$pwd"
 
                                 // store the results for the master node to read later
-                                stash name: "node $num", includes: '**/simulation-*.log'
+                                stash name: "node $num", includes: '**/simulation*.log'
                             }
                         }
                     }
