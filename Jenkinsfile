@@ -164,6 +164,7 @@ pipeline {
                                 // execute the Gatling load test
                                 sh(label: 'Run Gatling Scripts', script:  "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.noReports=true -Dgatling.simulationClass=${env.SIMULATION_CLASS}")
 
+                                sh "pwd"
                                 sh "mkdir test-results"
                                 sh "cp **/simulation.log test-results"
 
