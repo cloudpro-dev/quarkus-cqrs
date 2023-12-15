@@ -202,7 +202,7 @@ pipeline {
                         sh "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.reportsOnly=${env.TEST_NAME}"
 
                         // move results to a directory containing a dash (required by Gatling archiver)
-                        sh "mv ${env.TEST_NAME} ${env.TEST_NAME}-${dt}"
+                        sh "mv ./load-testing/target/gatling/${env.TEST_NAME} ./load-testing/target/gatling/${env.TEST_NAME}-${dt}"
 
                         // archive the Gatling reports in Jenkins
                         gatlingArchive()
