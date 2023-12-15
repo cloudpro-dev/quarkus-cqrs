@@ -1,5 +1,5 @@
 def testGroups = [:]
-def numberOfTestNodes = 1
+def numberOfTestNodes = 2
 
 pipeline {
 
@@ -154,11 +154,13 @@ pipeline {
                                 // make gradlew executable after SCM checkout
                                 sh "chmod +x ./mvnw"
                                 // build project up-front
-                                sh "./mvnw -f ./load-testing/pom.xml clean gatling:package"
+                                sh "./mvnw -f ./load-testing/pom.xml clean gatling:enterprisePackage"
                                 // let others know we are ready
                                 count++
+                                echo "$count before wait"
                                 // wait until everyone is ready
                                 waitUntil { count == numberOfTestNodes }
+                                echo "$count after wait"
                                 // execute the Gatling load test
                                 sh(label: 'Run Gatling Scripts', script:  "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.noReports=true -Dgatling.simulationClass=${env.SIMULATION_CLASS}")
 
