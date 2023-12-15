@@ -167,7 +167,7 @@ pipeline {
                                 sh "pwd"
                                 sh "rm -rf test-results"
                                 sh "mkdir test-results"
-                                sh "find . -name \*.log -exec cp '{}' test-results \;"
+                                sh "find . -name \\*.log -exec cp '{}' test-results \\;"
 
                                 // store the results for the master node to read later
                                 stash name: "node $num", includes: '**/simulation.log'
