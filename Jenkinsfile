@@ -164,7 +164,7 @@ pipeline {
 
                                 sh "rm -rf ./load-testing/target/gatling/${env.TEST_NAME}"
                                 sh "mkdir -p ./load-testing/target/gatling/${env.TEST_NAME}"
-                                sh "find . -name \\*.log -exec cp {} ./load-testing/target/gatling/${env.TEST_NAME}/{}-${count} \\;"
+                                sh "find . -name \\*.log -exec cp '{}' ./load-testing/target/gatling/${env.TEST_NAME}/simulation-${count}.log \\;"
 
                                 // store the results for the master node to read later
                                 stash name: "node $num", includes: '**/simulation.log'
