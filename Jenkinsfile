@@ -86,8 +86,6 @@ pipeline {
         stage("Setup") {
             steps {
                 script {
-
-
                     env.EVENT_STORE_URL = "${eventStoreUrl}"
                     env.VIEW_STORE_URL = "${viewStoreUrl}"
                     env.AGGREGATE_VIEW_URL = "${aggregateViewUrl}"
@@ -164,10 +162,9 @@ pipeline {
                                 // execute the Gatling load test
                                 sh(label: 'Run Gatling Scripts', script:  "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.noReports=true -Dgatling.simulationClass=${env.SIMULATION_CLASS}")
 
-                                sh "pwd"
-                                sh "rm -rf ./load-testing/target/gatling/test-results"
-                                sh "mkdir -p ./load-testing/target/gatling/test-results"
-                                sh "find . -name \\*.log -exec cp '{}' ./load-testing/target/gatling/test-results \\;"
+                                sh "rm -rf ./load-testing/target/gatling/${env.TEST_NAME}"
+                                sh "mkdir -p ./load-testing/target/gatling/${env.TEST_NAME}"
+                                sh "find . -name \\*.log -exec cp '{}' ./load-testing/target/gatling/${env.TEST_NAME} \\;"
 
                                 // store the results for the master node to read later
                                 stash name: "node $num", includes: '**/simulation.log'
@@ -202,10 +199,10 @@ pipeline {
                         sh "pwd"
 
                         // build reports
-                        sh "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.reportsOnly=test-results"
+                        sh "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.reportsOnly=${env.TEST_NAME}"
 
                         // move results to a directory containing a dash (required by Gatling archiver)
-                        sh "mv build/reports ${env.TEST_NAME}-${dt}"
+                        // sh "mv build/reports ${env.TEST_NAME}-${dt}"
 
                         // archive the Gatling reports in Jenkins
                         gatlingArchive()
