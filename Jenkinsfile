@@ -157,16 +157,14 @@ pipeline {
                                 sh "./mvnw -f ./load-testing/pom.xml clean gatling:enterprisePackage"
                                 // let others know we are ready
                                 count++
-                                echo "$count before wait"
                                 // wait until everyone is ready
                                 waitUntil { count == numberOfTestNodes }
-                                echo "$count after wait"
                                 // execute the Gatling load test
                                 sh(label: 'Run Gatling Scripts', script:  "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.noReports=true -Dgatling.simulationClass=${env.SIMULATION_CLASS}")
 
                                 sh "rm -rf ./load-testing/target/gatling/${env.TEST_NAME}"
                                 sh "mkdir -p ./load-testing/target/gatling/${env.TEST_NAME}"
-                                sh "find . -name \\*.log -exec cp '{}' ./load-testing/target/gatling/${env.TEST_NAME} \\;"
+                                sh "find . -name \\*.log -exec cp {} ./load-testing/target/gatling/${env.TEST_NAME}/{}-${count} \\;"
 
                                 // store the results for the master node to read later
                                 stash name: "node $num", includes: '**/simulation.log'
