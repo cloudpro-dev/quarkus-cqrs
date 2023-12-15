@@ -167,7 +167,7 @@ pipeline {
                                 sh "find . -name \\*.log -exec cp '{}' ./load-testing/target/gatling/${env.TEST_NAME}/simulation-${num}.log \\;"
 
                                 // store the results for the master node to read later
-                                stash name: "node $num", includes: '**/simulation*.log'
+                                stash name: "node $num", includes: '**/simulation-${num}.log'
                             }
                         }
                     }
@@ -194,9 +194,6 @@ pipeline {
                                 unstash "node $i"
                             }
                         }
-
-                        // show current directory
-                        sh "pwd"
 
                         // build reports
                         sh "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.reportsOnly=${env.TEST_NAME}"
