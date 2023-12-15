@@ -166,8 +166,10 @@ pipeline {
                                 sh "mkdir -p ./load-testing/target/gatling/${env.TEST_NAME}"
                                 sh "find . -name \\*.log -exec cp '{}' ./load-testing/target/gatling/${env.TEST_NAME}/simulation-${num}.log \\;"
 
+                                sh "$pwd"
+
                                 // store the results for the master node to read later
-                                stash name: "node $num", includes: './load-testing/target/gatling/${env.TEST_NAME}/simulation-${num}.log'
+                                stash name: "node $num", includes: '**/simulation-*.log'
                             }
                         }
                     }
