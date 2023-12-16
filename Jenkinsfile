@@ -148,7 +148,7 @@ pipeline {
                         // def agentno = i+2 // start from jenkins-agent-2
                         echo "Creating Agent Group ${runnerNodes[i]}"
                         testGroups["node $num"] = {
-                            node(runnerNodes[i]) {
+                            node("jenkins-agent-$agentno") {
                                 // delete existing directory on node
                                 deleteDir()
                                 // checkout code from SCM
