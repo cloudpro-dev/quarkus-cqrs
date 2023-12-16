@@ -162,14 +162,14 @@ pipeline {
                                 // execute the Gatling load test
                                 sh(label: 'Run Gatling Scripts', script:  "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.noReports=true -Dgatling.simulationClass=${env.SIMULATION_CLASS}")
 
+                                // TODO cat the lastRun.txt file to get the name of the folder
+
                                 sh "rm -rf ./load-testing/target/gatling/${env.TEST_NAME}"
                                 sh "mkdir -p ./load-testing/target/gatling/${env.TEST_NAME}"
                                 sh "find . -name \\*.log -exec cp '{}' ./load-testing/target/gatling/${env.TEST_NAME}/simulation-${num}.log \\;"
 
-                                sh "$pwd"
-
                                 // store the results for the master node to read later
-                                stash name: "node $num", includes: '**/simulation*.log'
+                                stash name: "node $num", includes: '**/simulation.log'
                             }
                         }
                     }
@@ -196,6 +196,9 @@ pipeline {
                                 unstash "node $i"
                             }
                         }
+
+                        // show current directory
+                        sh "pwd"
 
                         // build reports
                         sh "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.reportsOnly=${env.TEST_NAME}"
