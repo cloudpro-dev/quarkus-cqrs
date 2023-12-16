@@ -165,10 +165,8 @@ pipeline {
                                 // TODO cat the lastRun.txt file to get the name of the folder
 
                                 sh "pwd"
-                                sh "cat ./load-testing/target/gatling/lastRun.txt"
-
                                 def testFolderName="sh \$(cat ./load-testing/target/gatling/lastRun.txt)"
-                                sh "echo ${testFolderName}"
+                                echo "${testFolderName}"
 
                                 sh "rm -rf ./load-testing/target/gatling/${env.TEST_NAME}"
                                 sh "mkdir -p ./load-testing/target/gatling/${env.TEST_NAME}"
