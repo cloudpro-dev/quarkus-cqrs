@@ -1,5 +1,6 @@
 def testGroups = [:]
 def numberOfTestNodes = 2
+def runnerNodes = ["jenkins-agent-2", "jenkins-agent-3"]
 
 pipeline {
 
