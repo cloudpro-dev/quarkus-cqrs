@@ -162,7 +162,7 @@ pipeline {
                                 // execute the Gatling load test
                                 sh(label: 'Run Gatling Scripts', script:  "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.noReports=true -Dgatling.simulationClass=${env.SIMULATION_CLASS}")
 
-                                def gatlingRunId = sh(returnStdout: true, script: 'cat ./load-testing/target/gatling/lastRun.txt | tr "\\n" " " | xargs')
+                                def gatlingRunId = sh(returnStdout: true, script: 'cat ./load-testing/target/gatling/lastRun.txt')
                                 echo "Gatling Run ID: ${gatlingRunId}"
 
                                 def testDir = "./load-testing/target/gatling"
@@ -175,9 +175,9 @@ pipeline {
 
                                 sh "rm -rf ${testDir}"
                                 sh "mkdir -p ${testDir}"
-                                sh "cp ${testDir}/${gatlingRunId}/simulation.log ${reportDir}/simulation-${num}.log"
+                                // sh "cp ${testDir}/${gatlingRunId}/simulation.log ${reportDir}/simulation-${num}.log"
 
-                                // sh "find . -name \\*.log -exec cp '{}' ./load-testing/target/gatling/${env.TEST_NAME}/simulation-${num}.log \\;"
+                                sh "find . -name \\*.log -exec cp '{}' ./load-testing/target/gatling/${env.TEST_NAME}/simulation-${num}.log \\;"
 
                                 // store the results for the master node to read later
                                 stash name: "node $num", includes: '**/simulation*.log'
