@@ -145,7 +145,7 @@ pipeline {
                     def count = 0
                     for (int i = 0; i < runnerNodes.size(); i++) {
                         def num = i
-                        // def agentno = i+2 // start from jenkins-agent-2
+                        def agentno = i+2 // start from jenkins-agent-2
                         echo "Creating Agent Group ${runnerNodes[i]}"
                         testGroups["node $num"] = {
                             node("jenkins-agent-$agentno") {
