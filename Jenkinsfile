@@ -143,7 +143,7 @@ pipeline {
                     currentBuild.displayName = "${TEST_NAME}-${env.BUILD_NUMBER}"
 
                     def count = 0
-                    for (int i = 0; i < runnerNodes.size; i++) {
+                    for (int i = 0; i < runnerNodes.size(); i++) {
                         def num = i
                         // def agentno = i+2 // start from jenkins-agent-2
                         testGroups["node $num"] = {
