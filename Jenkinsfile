@@ -166,7 +166,7 @@ pipeline {
 
                                 sh "pwd"
                                 def testFolderName="sh \$(cat ./load-testing/target/gatling/lastRun.txt)"
-                                echo "${testFolderName}"
+                                echo "Test folder name: ${testFolderName}"
 
                                 sh "rm -rf ./load-testing/target/gatling/${env.TEST_NAME}"
                                 sh "mkdir -p ./load-testing/target/gatling/${env.TEST_NAME}"
