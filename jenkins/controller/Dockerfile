@@ -9,7 +9,6 @@ COPY --chown=jenkins:jenkins ./plugins.txt /usr/share/jenkins/plugins.txt
 RUN jenkins-plugin-cli --plugin-file=/usr/share/jenkins/plugins.txt
 
 # Poor man's Jcasc
-COPY --chown=jenkins:jenkins ./FirstJob /usr/share/jenkins/ref/jobs/FirstJob
 COPY --chown=jenkins:jenkins ./LoadTestJob /usr/share/jenkins/ref/jobs/LoadTestJob
 
 # because of /var/jenkins_home/.ssh/known_hosts [SSH] No Known Hosts file was found at /var/jenkins_home/.ssh/known_hosts. Please ensure one is created at this path and that Jenkins can read it.
