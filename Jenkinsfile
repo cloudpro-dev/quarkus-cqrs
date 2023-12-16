@@ -146,6 +146,7 @@ pipeline {
                     for (int i = 0; i < runnerNodes.size(); i++) {
                         def num = i
                         // def agentno = i+2 // start from jenkins-agent-2
+                        echo "Creating Agent Group ${runnerNodes[i]}"
                         testGroups["node $num"] = {
                             node(runnerNodes[i]) {
                                 // delete existing directory on node
