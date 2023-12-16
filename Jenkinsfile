@@ -173,11 +173,11 @@ pipeline {
 
                                 echo "Will execute command: cp ${testDir}/${gatlingRunId}/simulation.log ${reportDir}/simulation-${num}.log"
 
-                                sh "rm -rf ./load-testing/target/gatling/${env.TEST_NAME}"
-                                sh "mkdir -p ./load-testing/target/gatling/${env.TEST_NAME}"
-                                // sh "cp ${testDir}/${gatlingRunId}/simulation.log ${reportDir}/simulation-${num}.log"
+                                sh "rm -rf ${testDir}"
+                                sh "mkdir -p ${testDir}"
+                                sh "cp ${testDir}/${gatlingRunId}/simulation.log ${reportDir}/simulation-${num}.log"
 
-                                sh "find . -name \\*.log -exec cp '{}' ./load-testing/target/gatling/${env.TEST_NAME}/simulation-${num}.log \\;"
+                                // sh "find . -name \\*.log -exec cp '{}' ./load-testing/target/gatling/${env.TEST_NAME}/simulation-${num}.log \\;"
 
                                 // store the results for the master node to read later
                                 stash name: "node $num", includes: '**/simulation*.log'
