@@ -1,5 +1,4 @@
 def testGroups = [:]
-def numberOfTestNodes = 2
 def runnerNodes = ["jenkins-agent-2", "jenkins-agent-3"]
 
 pipeline {
@@ -145,8 +144,6 @@ pipeline {
                     def count = 0
                     for (int i = 0; i < runnerNodes.size(); i++) {
                         def num = i
-                        // def agentno = i+2 // start from jenkins-agent-2
-                        echo "Creating Agent Group ${runnerNodes[i]}"
                         testGroups["node $num"] = {
                             node(runnerNodes[num]) {
                                 // delete existing directory on node
@@ -160,7 +157,7 @@ pipeline {
                                 // let others know we are ready
                                 count++
                                 // wait until everyone is ready
-                                waitUntil { count == numberOfTestNodes }
+                                waitUntil { count == runnerNodes.size() }
                                 // execute the Gatling load test
                                 sh(label: 'Run Gatling Scripts', script:  "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.noReports=true -Dgatling.simulationClass=${env.SIMULATION_CLASS}")
 
@@ -203,7 +200,7 @@ pipeline {
 
                         // unstash results from runners
                         script {
-                            for (int i = 0; i < numberOfTestNodes; i++) {
+                            for (int i = 0; i < runnerNodes.size(); i++) {
                                 def num = i
                                 // unpacks to same directory on host
                                 unstash "node $i"
