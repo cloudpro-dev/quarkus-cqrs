@@ -143,11 +143,11 @@ pipeline {
                     currentBuild.displayName = "${TEST_NAME}-${env.BUILD_NUMBER}"
 
                     def count = 0
-                    for (int i = 0; i < numberOfTestNodes; i++) {
+                    for (int i = 0; i < runnerNodes.size; i++) {
                         def num = i
-                        def agentno = i+2 // start from jenkins-agent-2
+                        // def agentno = i+2 // start from jenkins-agent-2
                         testGroups["node $num"] = {
-                            node("jenkins-agent-$agentno") {
+                            node(runnerNodes[i]) {
                                 // delete existing directory on node
                                 deleteDir()
                                 // checkout code from SCM
