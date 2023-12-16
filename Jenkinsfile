@@ -167,12 +167,15 @@ pipeline {
                                 sh "pwd"
                                 sh "cat ./load-testing/target/gatling/lastRun.txt"
 
+                                def testFolderName="$(cat ./load-testing/target/gatling/lastRun.txt)"
+                                sh "echo ${testFolderName}"
+
                                 sh "rm -rf ./load-testing/target/gatling/${env.TEST_NAME}"
                                 sh "mkdir -p ./load-testing/target/gatling/${env.TEST_NAME}"
                                 sh "find . -name \\*.log -exec cp '{}' ./load-testing/target/gatling/${env.TEST_NAME}/simulation-${num}.log \\;"
 
                                 // store the results for the master node to read later
-                                stash name: "node $num", includes: '**/simulation.log'
+                                stash name: "node $num", includes: '**/simulation*.log'
                             }
                         }
                     }
