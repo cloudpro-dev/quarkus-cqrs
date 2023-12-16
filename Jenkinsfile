@@ -173,8 +173,8 @@ pipeline {
 
                                 echo "Will execute command: cp ${testDir}/${gatlingRunId}/simulation.log ${reportDir}/simulation-${num}.log"
 
-                                sh "rm -rf ${testDir}"
-                                sh "mkdir -p ${testDir}"
+                                sh "rm -rf ${reportDir}"
+                                sh "mkdir -p ${reportDir}"
                                 // sh "cp ${testDir}/${gatlingRunId}/simulation.log ${reportDir}/simulation-${num}.log"
 
                                 sh "find . -name \\*.log -exec cp '{}' ./load-testing/target/gatling/${env.TEST_NAME}/simulation-${num}.log \\;"
