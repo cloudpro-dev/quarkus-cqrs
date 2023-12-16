@@ -162,7 +162,7 @@ pipeline {
                                 // execute the Gatling load test
                                 sh(label: 'Run Gatling Scripts', script:  "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.noReports=true -Dgatling.simulationClass=${env.SIMULATION_CLASS}")
 
-                                def gatlingRunId = sh(returnStdout: true, script: 'cat ./load-testing/target/gatling/lastRun.txt | tr "\n" " "')
+                                def gatlingRunId = sh(returnStdout: true, script: 'cat ./load-testing/target/gatling/lastRun.txt | tr "\n" " " | tr -d " "')
                                 echo "Gatling Run ID: ${gatlingRunId}"
 
                                 def testDir = "./load-testing/target/gatling"
