@@ -1,9 +1,11 @@
 def testGroups = [:]
+// slave nodes
 def runnerNodes = ["jenkins-agent-2", "jenkins-agent-3"]
 
 pipeline {
 
     agent {
+        // master node
         label 'jenkins-agent-1'
     }
 
@@ -148,35 +150,43 @@ pipeline {
                             node(runnerNodes[num]) {
                                 // delete existing directory on node
                                 deleteDir()
+
                                 // checkout code from SCM
                                 checkout scm
+
                                 // make gradlew executable after SCM checkout
                                 sh "chmod +x ./mvnw"
+
                                 // build project up-front
                                 sh "./mvnw -f ./load-testing/pom.xml clean gatling:enterprisePackage"
+
                                 // let others know we are ready
                                 count++
+
                                 // wait until everyone is ready
                                 waitUntil { count == runnerNodes.size() }
+
                                 // execute the Gatling load test
                                 sh(label: 'Run Gatling Scripts', script:  "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.noReports=true -Dgatling.simulationClass=${env.SIMULATION_CLASS}")
 
+                                // obtain the Gatling Run ID
                                 def gatlingRunId = sh(returnStdout: true, script: 'cat ./load-testing/target/gatling/lastRun.txt | tr "\n" " " | tr -d " "')
                                 echo "Gatling Run ID: ${gatlingRunId}"
 
+                                // test directory
                                 def testDir = "./load-testing/target/gatling"
                                 echo "Test dir: ${testDir}"
 
+                                // report directory
                                 def reportDir = "${testDir}/${env.TEST_NAME}"
                                 echo "Report dir: ${reportDir}"
 
-                                // echo "Will execute command: cp ${testDir}/${gatlingRunId}/simulation.log ${reportDir}/simulation-${num}.log"
-
+                                // create report directory
                                 sh "rm -rf ${reportDir}"
                                 sh "mkdir -p ${reportDir}"
-                                sh "cp ${testDir}/${gatlingRunId}/simulation.log ${reportDir}/simulation-${num}.log"
 
-                                // sh "find . -name \\*.log -exec cp '{}' ./load-testing/target/gatling/${env.TEST_NAME}/simulation-${num}.log \\;"
+                                // copy simulation.log using a unique name for the node
+                                sh "cp ${testDir}/${gatlingRunId}/simulation.log ${reportDir}/simulation-${num}.log"
 
                                 // store the results for the master node to read later
                                 stash name: "node $num", includes: '**/simulation*.log'
@@ -206,9 +216,6 @@ pipeline {
                                 unstash "node $i"
                             }
                         }
-
-                        // show current directory
-                        sh "pwd"
 
                         // build reports
                         sh "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.reportsOnly=${env.TEST_NAME}"
