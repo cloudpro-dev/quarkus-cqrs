@@ -6,9 +6,9 @@ pipelineJob('job-dsl-plugin') {
       scm {
         git {
           remote {
-            url('/var/repo/code')
+            url('http://code.webnodes.co.uk/geek/quarkus-cqrs.git')
           }
-          name('*/jenkins')
+          branch('*/jenkins')
         }
       }
       scriptPath('Jenkinsfile')
