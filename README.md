@@ -612,5 +612,40 @@ export FATIGUE_TOTAL_STEP_COUNT=4
 mvn gatling:test -Dgatling.simulationClass=cqrs.FatigueTestSimulation
 ```
 
+# Scaling out with Gatling open-source
+Gatling open-source does not have a cluster mode, but you can achieve similar results manually. You will have to configure all your load injectors, and aggregate the results manually. The steps are:
 
+- deploy Gatling on several machines along with the Simulation classes and the associated resources (data, bodies, etc…)
+- launch them remotely from a script, with the -nr (no reports) option
+- retrieve all the simulation.log files
+- rename them so they don’t clash
+- place them into a folder in the results folder of a Gatling instance
+- generate the reports with Gatling with the -ro name-of-the-simulation-folder (reports only), Gatling will pick all the files that match .*\.log
 
+## Jenkins
+A full Jenkins installation and all required configuration is already provided to run the load test in a distributed manner. 
+
+To start up the Jenkins server and 2 agents you can use the following command:
+```shell
+docker compose -f docker-compose-jenkins.yml up -d
+```
+
+Once the containers have started you can access the Jenkins UI at `http://localhost:8080/`.
+
+Perform a login using the `Log in` link in the top-right with a username of `admin` and password of `butler`. 
+
+The `LoadTestJob` will perform the load test for the project.
+
+### Jenkins agents
+The master node will orchestrate the tests, and the slave nodes will perform the actual load test requests.
+
+The master and slave node labels are defined in the `Jenkinsfile`.
+
+### First run
+Click the `Build now` button to download the Jenkins pipeline job and complete the Jenkins setup.  The job will fail
+because you have not yet been able to define the necessary environment variables.  Do not worry, after this run 
+completes you will be able to do this via the UI.
+
+### Subsequent runs
+Now you can click the `Build with parameters` button which will provide a UI with all the load test attributes which
+can be configured on a per-run basis.

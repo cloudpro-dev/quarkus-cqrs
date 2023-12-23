@@ -1,0 +1,18 @@
+#!/usr/bin/env groovy
+
+pipelineJob('job-dsl-plugin') {
+  definition {
+    cpsScm {
+      scm {
+        git {
+          remote {
+            url('/var/repo/code')
+          }
+          name('*/jenkins')
+        }
+      }
+      scriptPath('Jenkinsfile')
+      lightweight()
+    }
+  }
+}
