@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # MinIO
 kubectl delete -f ./minio/minio-deployment.yml -n monitoring && \
 kubectl delete -f ./minio/minio-service.yml -n monitoring && \

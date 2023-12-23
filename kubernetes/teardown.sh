@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Infrastructure
 kubectl delete -f ./postgres.yml -n cqrs && \
 kubectl delete -f ./mongo.yml -n cqrs && \

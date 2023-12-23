@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Namespace
 kubectl create namespace monitoring && \
 
