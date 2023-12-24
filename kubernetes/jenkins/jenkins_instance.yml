@@ -32,6 +32,8 @@ spec:
         version: "1.258.v95949f923a_a_e"
       - name: gatling
         version: "1.3.0"
+      - name: parameter-separator
+        version: "129.v86b_98b_cb_5274"
     disableCSRFProtection: false
     containers:
       - name: jenkins-master
