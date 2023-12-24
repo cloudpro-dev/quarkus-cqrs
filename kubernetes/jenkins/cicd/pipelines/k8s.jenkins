@@ -1,10 +1,10 @@
 #!/usr/bin/env groovy
 
 podTemplate(label: 'jenkins-agent-1') {
-    node('jenkins-agent-1') {
+    node(POD_LABEL) {
         stage('Run outer shell') {
             sh 'echo hello world 1'
-            podTemplate(label: 'jenkins-agent-2') {
+            podTemplate(POD_LABEL) {
                 node('jenkins-agent-2') {
                     stage('Run outer shell') {
                         sh 'echo hello world 2'
