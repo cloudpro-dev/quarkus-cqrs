@@ -5,7 +5,7 @@ podTemplate(label: 'jenkins-agent-1') {
         stage('Run outer shell') {
             sh 'echo hello world 1'
             podTemplate(POD_LABEL) {
-                node('jenkins-agent-2') {
+                node(POD_LABEL) {
                     stage('Run outer shell') {
                         sh 'echo hello world 2'
                     }
