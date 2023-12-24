@@ -11,7 +11,7 @@ pipelineJob('job-dsl-plugin') {
           branch('*/jenkins')
         }
       }
-      scriptPath('Jenkinsfile')
+      scriptPath('kubernetes/jenkins/cicd/pipelines/k8s.jenkins')
       lightweight()
     }
   }
