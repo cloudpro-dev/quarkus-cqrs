@@ -6,6 +6,13 @@ def runnerNodes = 2
 
 pipeline {
 
+    agent {
+        kubernetes {
+            defaultContainer 'maven'
+            yamlFile 'KubernetesPod.yaml'
+        }
+    }
+
     parameters {
         separator(name: "Endpoints", sectionHeader: "Service Endpoints", sectionHeaderStyle: """font-size:2em""")
 
