@@ -142,6 +142,9 @@ pipeline {
             }
         }
         stage('Load Test') {
+            kubernetes {
+                defaultContainer 'maven'
+            }
             steps {
                 script {
                     currentBuild.displayName = "${TEST_NAME}-${env.BUILD_NUMBER}"
