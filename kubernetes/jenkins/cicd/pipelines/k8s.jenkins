@@ -156,6 +156,8 @@ pipeline {
                         def num = i
                         testGroups["node $num"] = {
                             podTemplate {
+                                echo "Pod label is: ${POD_LABEL}"
+
                                 node(POD_LABEL) {
                                     // delete existing directory on node
                                     deleteDir()
