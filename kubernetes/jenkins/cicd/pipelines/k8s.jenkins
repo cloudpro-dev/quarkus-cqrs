@@ -142,8 +142,10 @@ pipeline {
             }
         }
         stage('Load Test') {
-            kubernetes {
-                defaultContainer 'maven'
+            agent {
+                kubernetes {
+                    defaultContainer 'maven'
+                }
             }
             steps {
                 script {
