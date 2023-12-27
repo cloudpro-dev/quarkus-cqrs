@@ -229,7 +229,7 @@ pipeline {
 
                         // unstash results from runners
                         script {
-                            for (int i = 0; i < runnerNodes.size(); i++) {
+                            for (int i = 0; i < runnerNodes; i++) {
                                 def num = i
                                 // unpacks to same directory on host
                                 unstash "node $i"
