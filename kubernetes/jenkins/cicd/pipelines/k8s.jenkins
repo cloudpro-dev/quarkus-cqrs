@@ -8,7 +8,17 @@ pipeline {
 
     agent {
         kubernetes {
-            defaultContainer 'maven'
+            yaml '''
+            apiVersion: v1
+            kind: Pod
+            spec:
+              containers:
+              - name: maven
+                image: maven:alpine
+                command:
+                - cat
+                tty: true
+            '''
         }
     }
 
@@ -142,7 +152,6 @@ pipeline {
             }
         }
         stage('Load Test') {
-
             steps {
                 script {
                     currentBuild.displayName = "${TEST_NAME}-${env.BUILD_NUMBER}"
@@ -154,48 +163,52 @@ pipeline {
                             echo "Pod label is: ${POD_LABEL}"
 
                             node(POD_LABEL) {
-                                // delete existing directory on node
-                                deleteDir()
+                                container('maven') {
+                                    echo "Container label is: ${POD_CONTAINER}"
 
-                                // checkout code from SCM
-                                checkout scm
+                                    // delete existing directory on node
+                                    deleteDir()
 
-                                // make gradlew executable after SCM checkout
-                                sh "chmod +x ./mvnw"
+                                    // checkout code from SCM
+                                    checkout scm
 
-                                // build project up-front
-                                sh "./mvnw -f ./load-testing/pom.xml clean gatling:enterprisePackage"
+                                    // make gradlew executable after SCM checkout
+                                    sh "chmod +x ./mvnw"
 
-                                // let others know we are ready
-                                count++
+                                    // build project up-front
+                                    sh "./mvnw -f ./load-testing/pom.xml clean gatling:enterprisePackage"
 
-                                // wait until everyone is ready
-                                waitUntil { count == runnerNodes }
+                                    // let others know we are ready
+                                    count++
 
-                                // execute the Gatling load test
-                                sh(label: 'Run Gatling Scripts', script: "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.noReports=true -Dgatling.simulationClass=${env.SIMULATION_CLASS}")
+                                    // wait until everyone is ready
+                                    waitUntil { count == runnerNodes }
 
-                                // obtain the Gatling Run ID
-                                def gatlingRunId = sh(returnStdout: true, script: 'cat ./load-testing/target/gatling/lastRun.txt | tr "\n" " " | tr -d " "')
-                                echo "Gatling Run ID: ${gatlingRunId}"
+                                    // execute the Gatling load test
+                                    sh(label: 'Run Gatling Scripts', script: "./mvnw -f ./load-testing/pom.xml gatling:test -Dgatling.noReports=true -Dgatling.simulationClass=${env.SIMULATION_CLASS}")
 
-                                // test directory
-                                def testDir = "./load-testing/target/gatling"
-                                echo "Test dir: ${testDir}"
+                                    // obtain the Gatling Run ID
+                                    def gatlingRunId = sh(returnStdout: true, script: 'cat ./load-testing/target/gatling/lastRun.txt | tr "\n" " " | tr -d " "')
+                                    echo "Gatling Run ID: ${gatlingRunId}"
 
-                                // report directory
-                                def reportDir = "${testDir}/${env.TEST_NAME}"
-                                echo "Report dir: ${reportDir}"
+                                    // test directory
+                                    def testDir = "./load-testing/target/gatling"
+                                    echo "Test dir: ${testDir}"
 
-                                // create report directory
-                                sh "rm -rf ${reportDir}"
-                                sh "mkdir -p ${reportDir}"
+                                    // report directory
+                                    def reportDir = "${testDir}/${env.TEST_NAME}"
+                                    echo "Report dir: ${reportDir}"
 
-                                // copy simulation.log using a unique name for the node
-                                sh "cp ${testDir}/${gatlingRunId}/simulation.log ${reportDir}/simulation-${num}.log"
+                                    // create report directory
+                                    sh "rm -rf ${reportDir}"
+                                    sh "mkdir -p ${reportDir}"
 
-                                // store the results for the master node to read later
-                                stash name: "node $num", includes: '**/simulation*.log'
+                                    // copy simulation.log using a unique name for the node
+                                    sh "cp ${testDir}/${gatlingRunId}/simulation.log ${reportDir}/simulation-${num}.log"
+
+                                    // store the results for the master node to read later
+                                    stash name: "node $num", includes: '**/simulation*.log'
+                                }
                             }
                         }
                     }
