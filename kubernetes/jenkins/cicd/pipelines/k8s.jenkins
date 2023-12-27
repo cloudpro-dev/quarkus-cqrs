@@ -2,7 +2,7 @@
 
 def testGroups = [:]
 // slave nodes
-def runnerNodes = 1
+def runnerNodes = 2
 
 pipeline {
 
