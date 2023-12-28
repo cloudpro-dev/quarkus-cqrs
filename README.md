@@ -670,9 +670,8 @@ Once the Jenkins instance has been deployed you will need to set up port forward
 kubectl port-forward -n jenkins jenkins-load-test 8080:8080
 ```
 
-To log in you will need the username and password which can be obtained using the following commands:
+To log in you will need the username of `jenkins-operator` and the password which can be obtained using the following commands:
 ```
-kubectl get secret -n jenkins jenkins-operator-credentials-load-test -o 'jsonpath={.data.user}' | base64 -d
 kubectl get secret -n jenkins jenkins-operator-credentials-load-test -o 'jsonpath={.data.password}' | base64 -d
 ```
 
