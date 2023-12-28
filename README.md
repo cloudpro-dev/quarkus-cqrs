@@ -625,6 +625,8 @@ Gatling open-source does not have a cluster mode, but you can achieve similar re
 ## Jenkins
 A full Jenkins installation and all required configuration is already provided to run the load test in a distributed manner. 
 
+### Docker
+
 To start up the Jenkins server and 2 agents you can use the following command:
 ```shell
 docker compose -f docker-compose-jenkins.yml up -d
@@ -636,10 +638,45 @@ Perform a login using the `Log in` link in the top-right with a username of `adm
 
 The `LoadTestJob` will perform the load test for the project.
 
-### Jenkins agents
+#### Jenkins agents
 The master node will orchestrate the tests, and the slave nodes will perform the actual load test requests.
 
 The master and slave node labels are defined in the `Jenkinsfile`.
+
+### Kubernetes
+
+Install the Jenkins Kubernetes Operator using the following command:
+```
+kubectl apply -f https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/master/config/crd/bases/jenkins.io_jenkins.yaml
+```
+
+Create the `jenkins` namespace to hold all resources:
+```
+kubectl create ns jenkins
+```
+
+Install the Operator in `jenkins` namespace with:
+```
+kubectl apply -n jenkins -f https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/master/deploy/all-in-one-v1alpha2.yaml
+```
+
+To start up the Jenkins server use the following command:
+```
+kubectl apply -n jenkins -f kubernetes/jenkins/jenkins-instance.yml
+```
+
+Once the Jenkins instance has been deployed you will need to set up port forwarding to gain access to the Jenkins UI at `http://localhost:8080/`.
+```
+kubectl port-forward -n jenkins jenkins-load-test 8080:8080
+```
+
+To log in you will need the username and password which can be obtained using the following commands:
+```
+kubectl get secret -n jenkins jenkins-operator-credentials-load-test -o 'jsonpath={.data.user}' | base64 -d
+kubectl get secret -n jenkins jenkins-operator-credentials-load-test -o 'jsonpath={.data.password}' | base64 -d
+```
+
+## Executing the tests
 
 ### First run
 Click the `Build now` button to download the Jenkins pipeline job and complete the Jenkins setup.  The job will fail
@@ -649,3 +686,4 @@ completes you will be able to do this via the UI.
 ### Subsequent runs
 Now you can click the `Build with parameters` button which will provide a UI with all the load test attributes which
 can be configured on a per-run basis.
+
