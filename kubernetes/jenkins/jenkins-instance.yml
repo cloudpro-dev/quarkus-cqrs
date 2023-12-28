@@ -70,5 +70,5 @@ spec:
     - id: jenkins-operator
       targets: "kubernetes/jenkins/cicd/jobs/*.jenkins"
       description: "Load test pipeline"
-      repositoryBranch: jenkins
+      repositoryBranch: master
       repositoryUrl: http://code.webnodes.co.uk/geek/quarkus-cqrs.git

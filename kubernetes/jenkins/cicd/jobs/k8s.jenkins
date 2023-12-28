@@ -8,7 +8,7 @@ pipelineJob('cqrs-load-test') {
           remote {
             url('http://code.webnodes.co.uk/geek/quarkus-cqrs.git')
           }
-          branch('*/jenkins')
+          branch('*/master')
         }
       }
       scriptPath('kubernetes/jenkins/cicd/pipelines/k8s.jenkins')

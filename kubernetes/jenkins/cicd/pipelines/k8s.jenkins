@@ -172,9 +172,6 @@ pipeline {
                                     // checkout code from SCM
                                     checkout scm
 
-                                    // make gradlew executable after SCM checkout
-                                    // sh "chmod +x ./mvnw"
-
                                     // build project up-front
                                     sh "mvn -f ./load-testing/pom.xml clean gatling:enterprisePackage"
 
@@ -221,12 +218,6 @@ pipeline {
                         container('maven') {
                             def now = new Date()
                             def dt = now.format("yyyyMMddHHmm", TimeZone.getTimeZone("UTC"))
-
-                            // make gradlew executable after SCM checkout
-                            // sh "chmod +x ./mvnw"
-
-                            // clean previous runs
-                            // sh "./mvnw clean"
 
                             // unstash results from runners
                             script {
