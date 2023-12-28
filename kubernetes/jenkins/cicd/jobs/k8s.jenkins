@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-pipelineJob('job-dsl-plugin') {
+pipelineJob('cqrs-load-test') {
   definition {
     cpsScm {
       scm {
