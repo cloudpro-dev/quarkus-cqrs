@@ -14,15 +14,15 @@ pipeline {
     parameters {
         separator(name: "Endpoints", sectionHeader: "Service Endpoints", sectionHeaderStyle: """font-size:2em""")
 
-        string(defaultValue: 'http://localhost:9020',
+        string(defaultValue: 'http://docker-event-store-1:9020',
                             description: 'Event Store URL',
                             name: 'eventStoreUrl')
 
-        string(defaultValue: 'http://localhost:9010',
+        string(defaultValue: 'http://docker-view-store-1:9010',
                             description: 'View Store URL',
                             name: 'viewStoreUrl')
 
-        string(defaultValue: 'http://localhost:9040',
+        string(defaultValue: 'http://docker-aggregate-view-1:9040',
                             description: 'Aggregate View URL',
                             name: 'aggregateViewUrl')
 
