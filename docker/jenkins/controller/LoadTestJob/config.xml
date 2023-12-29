@@ -24,14 +24,14 @@
             </userRemoteConfigs>
             <branches>
                 <hudson.plugins.git.BranchSpec>
-                    <name>*/master</name>
+                    <name>*/docker-folder</name>
                 </hudson.plugins.git.BranchSpec>
             </branches>
             <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
             <submoduleCfg class="empty-list"/>
             <extensions/>
         </scm>
-        <scriptPath>Jenkinsfile</scriptPath>
+        <scriptPath>docker/Jenkinsfile</scriptPath>
         <lightweight>true</lightweight>
     </definition>
     <triggers/>

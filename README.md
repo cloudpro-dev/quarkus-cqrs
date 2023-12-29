@@ -130,7 +130,7 @@ Results are published by Galting to to HTML reports:
 ## Running the application in dev mode
 
 You can run your application in dev mode that enables live coding using:
-```shell script
+``` script
 mvn compile quarkus:dev
 ```
 
@@ -139,7 +139,7 @@ mvn compile quarkus:dev
 ## Packaging and running the application
 
 The application can be packaged using:
-```shell script
+``` script
 mvn package
 ```
 It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
@@ -148,7 +148,7 @@ Be aware that it’s not an _über-jar_ as the dependencies are copied into the 
 The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
 
 If you want to build an _über-jar_, execute the following command:
-```shell script
+``` script
 mvn package -Dquarkus.package.type=uber-jar
 ```
 
@@ -157,12 +157,12 @@ The application, packaged as an _über-jar_, is now runnable using `java -jar ta
 ## Creating a native executable
 
 You can create a native executable using: 
-```shell script
+``` script
 mvn package -Pnative
 ```
 
 Or, if you don't have GraalVM installed, you can run the native executable build in a container using: 
-```shell script 
+``` script 
 mvn package -Pnative -Dquarkus.native.container-build=true
 ```
 
@@ -173,7 +173,7 @@ If you want to learn more about building native executables, please consult http
 # Testing the Native image
 
 To test the native image, run the integration tests against the generated binary:
-```shell
+```
 mvn verify -Pnative
 ```
 
@@ -192,12 +192,12 @@ mvn verify -Pnative
 You should have a recent version of Docker installed (19.03.0+)
 
 Deploy the infrastructure to Docker:
-```shell
-docker-compose -f docker-compose.yml up -d
+```
+docker-compose -f ./docker/docker-compose.yml up -d
 ```
 
 Next you need to build the Docker container images from the applications:
-```shell
+```
 mvn clean package \
   -DskipTests \
   -Dquarkus.container-image.build=true \
@@ -205,7 +205,7 @@ mvn clean package \
 ```
 
 If you wish to build a native version of the application into the container image, then use the following command:
-```shell
+```
 mvn clean package \
   -Pnative \
   -DskipTests \
@@ -214,8 +214,8 @@ mvn clean package \
 ```
 
 Finally, run the packaged application containers as a single platform:
-```shell
-docker-compose -f docker-compose-dev.yml up -d
+```
+docker-compose -f ./docker/docker-compose-dev.yml up -d
 ```
 
 ## Manual testing
@@ -224,13 +224,13 @@ You can manually call the application API to create a new account and perform so
 To view the aggregated bank account information produced by the `event-stream` application as the tests run, open the Websocket enabled application at `localhost:9040`.
 
 To run the commands against the local instances, create the following env vars:
-```shell
+```
 export EVENT_STORE_URL=localhost:9020
 export VIEW_STORE_URL=localhost:9010
 ```
 
 Now you can run the commands script which will execute all the bank account commands and then query back the latest state of the account from the query side.
-```shell
+```
 ./commands.sh
 ```
 
@@ -238,7 +238,7 @@ Now you can run the commands script which will execute all the bank account comm
 
 ## Pre-requisites
 If you have not already, start Minikube and wait for it to become ready.
-```shell
+```
 minikube start --memory=8096 --cpus=6 --bootstrapper=kubeadm && \
 minikube addons enable dashboard && \
 minikube addons enable metrics-server
@@ -246,30 +246,29 @@ minikube addons enable metrics-server
 
 Once the Minikube cluster has started, we can start the Minikube Dashboard for monitoring the infrastructure as we
 deploy it.  Once started, the Dashboard will open in a new browser session.
-```shell
+```
 minikube dashboard
 ```
 _Note: This will block the current terminal session until you exit._
 
 **Important: All infrastructure will be created in a new separate namespace.  You will need to select the `cqrs` namespace in the Dashboard UI (top banner) to be able to manage these resources.**
 
-
 Before we can deploy the applications we must set up the necessary infrastructure in the Kubernetes cluster.
 
 Create a new namespace for the whole platform:
-```shell
+```
 kubectl create ns cqrs
 ```
 
 Deploy the infrastructure to Kubernetes:
-```shell
+```
 kubectl apply -f ./kubernetes/postgres.yml -n cqrs
 kubectl apply -f ./kubernetes/mongo.yml -n cqrs
 kubectl apply -f ./kubernetes/kafka.yml -n cqrs
 ```
 
 To access the Kafka server in the Kubernetes cluster, we must add a new Pod running Kafka client tools:
-```shell
+```
 kubectl run kafka-client -n cqrs --rm -ti --image bitnami/kafka:3.4 -- bash
 I have no name!@kafka-client:/$ /opt/bitnami/kafka/bin/kafka-console-consumer.sh --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 --topic event-store --from-beginning --partition 0
 ```
@@ -311,7 +310,7 @@ mvn clean package \
 
 ### Manually scaling consumers
 Once all the consumers come up, we can scale each of the services horizontally using the following command:
-```shell
+```
 kubectl scale -n cqrs deployment view-store --replicas=3
 ```
 
@@ -320,18 +319,18 @@ If we want to perform auto-scaling based on CPU or memory consumption of the app
 HPA rules to scale the instances up and down.  The example included will spin up a new instance when all the running
 Pods have exceeded 75% CPU utilisation.  When CPU utilisation drops below 75% across all Pods, then the instances will
 be scaled back down.
-```shell
+```
 kubectl autoscale deployment view-store -n cqrs --cpu-percent=75 --min=1 --max=3
 ```
 
 To remove or adjust the auto-scaling you can use the following command:
-```shell
+```
 kubectl delete -n cqrs horizontalpodautoscaler view-store
 ```
 
 To see the HPA in action you can run the following command whilst a load test is being performed.
 
-```shell
+```
 kubectl get hpa view-store -n cqrs --watch
 NAME         REFERENCE               TARGETS    MINPODS   MAXPODS   REPLICAS   AGE
 view-store   Deployment/view-store   2%/50%     1         3         1          2m3s
@@ -358,18 +357,18 @@ _Note: It can take up to 5 minutes after the test completes before the number of
 
 ### Standard JAR testing 
 To test the standard JAR version of the application you can run the standard integration tests:
-```shell
+```
 mvn clean verify
 ```
 
 ### Native image testing
 Integration tests are used to make sure that the application functions correct once it has been converted to a native application.
-```shell
+```
 mvn clean verify -Pnative
 ```
 
 Note: If you receive an error similar to the following:
-```shell
+```
 Error: Invalid Path entry event-store-1.0.0-SNAPSHOT-runner.jar
 Caused by: java.nio.file.NoSuchFileException: /project/event-store-1.0.0-SNAPSHOT-runner.jar
 ```
@@ -380,24 +379,24 @@ checking the output for `k8.io` based containers. You can always start a new ter
 You can manually call the application API to create a new account and perform some actions.
 
 To run the commands against the local instances, create the following env vars:
-```shell
+```
 export EVENT_STORE_URL=localhost:9020
 export VIEW_STORE_URL=localhost:9010
 export AGGREGATE_VIEW_URL=localhost:9040
 ```
 
 To run the commands against a Kubernetes deployment, create the following env vars:
-```shell
+```
 export EVENT_STORE_URL=$(minikube service --url event-store -n cqrs | head -n 1)
 export VIEW_STORE_URL=$(minikube service --url view-store -n cqrs | head -n 1)
 export AGGREGATE_VIEW_URL=$(minikube service --url aggregate-view -n cqrs | head -n 1)
 ```
 
 Now you can run the commands script which will execute all the bank account commands and then query back the latest state of the account from the query side.
-```shell
+```
 ./commands.sh
 ```
-cd 
+
 # Monitoring
 
 The application provides full observability of the application stack using:
@@ -415,24 +414,19 @@ The Grafana UI can be accessed at http://localhost:3005/ and provides a number o
 
 ## Docker Setup
 To set up the monitoring on Docker, you simply need to run the `docker-compose` script:
-```shell
-docker compose -f ./monitoring/docker-compose-monitoring.yml up -d
 ```
-To remove all the Docker monitoring, use the same script to stop the Docker instances:
+docker compose -f ./docker/docker-compose-monitoring.yml up -d
 ```
-docker compose -f ./monitoring/docker-compose-monitoring.yml down -v
-```
-_Important: The `-v` flag will remove all the Docker volumes and data associated with Docker instances.
 
 ### Kubernetes Setup
 To set up the monitoring on the Kubernetes cluster, you can run the setup script which will deploy all necessary
 resources:
-```shell
+```
 ./kubernetes/monitoring/setup.sh
 ```
 
 In the event that you want to delete all the deployed Kubernetes monitoring, you can run the tear down script:
-```shell
+```
 ./kubernetes/monitoring/teardown.sh
 ```
 
@@ -442,18 +436,18 @@ more important endpoints in the event you need to debug.
 ## Tempo
 
 ### Configuration
-```shell
+```
 curl localhost:3200/status/config | grep metrics
 ```
 
 ### Metrics
 Tempo will show metrics which indicate the state of the `metrics-generator`:
-```shell
+```
 curl http://localhost:3200/metrics | grep tempo_metrics_generator
 ```
 
 ### Trace by ID
-```shell
+```
 curl http://localhost:3200/api/traces/154634d2162353cb2d0ed94ab1bde6f0
 ```
 
@@ -475,12 +469,12 @@ Tempo [service graphs](https://grafana.com/docs/tempo/latest/metrics-generator/s
 The main Prometheus dashboard can be accessed at http://localhost:9090/
 
 Query Prometheus for the relevant metrics:
-```shell
+```
 curl 'http://localhost:9090/api/v1/query?query=traces_spanmetrics_latency_bucket'
 {"status":"success","data":{"resultType":"vector","result":[]}}
 ```
 
-```shell
+```
 export PROMETHEUS_URL=$(minikube service --url prometheus-svc -n monitoring | head -n 1)
 curl "$PROMETHEUS_URL/api/v1/label/kubernetes_name/values" | jq
 {
@@ -500,7 +494,7 @@ curl "$PROMETHEUS_URL/api/v1/label/kubernetes_name/values" | jq
 Quarkus supports Exemplars (metrics with an associated `traceId` and `spanId`) via Prometheus using the standard `quarkus-micrometer-prometheus` extension.
 
 By adding the `@Timed` annotation to your methods, you will see that Prometheus metrics will contain the extra information.
-```shell
+```
 curl -v http://localhost:9010/q/metrics | grep view_store_message_process_seconds_bucket
 view_store_message_process_seconds_bucket{class="com.example.BankAccountResource",exception="none",method="getAllByBalance",le="0.016777216"} 2.0 # {span_id="d1f2591c877b95b9",trace_id="08c32eb410514f827454363c63fc1ebb"} 0.016702041 1684067985.642
 ```
@@ -508,13 +502,13 @@ _Note: Not every entry will have traceId and spanId as Exemplars are sampled dat
 
 ## Logstash
 
-```shell
+```
 curl -XGET 'localhost:9600/?pretty'
 curl -XGET 'localhost:9600/_node/pipelines?pretty'
 ```
 
 You can test that the Logstash server is receiving data by using the `nc` command:
-```shell
+```
 echo '{"message": {"someField":"someValue"} }' > tmp.json
 nc localhost:5400 < tmp.json
 ```
@@ -526,7 +520,7 @@ Logs received by Logstash will be exported to Loki for ingestion and storage.
 Labels are an [extremely important factor](https://grafana.com/docs/loki/latest/get-started/labels/) when working with Loki.
 
 You can query the amount of labels generated by Logstash and Prometheus using the following command:
-```shell
+```
 curl -G -s  "http://localhost:3100/loki/api/v1/labels" | jq
 {
   "status": "success",
@@ -540,7 +534,7 @@ curl -G -s  "http://localhost:3100/loki/api/v1/labels" | jq
 ```
 
 To query the logs in Loki:
-```shell
+```
 curl -G -s  "http://localhost:3100/loki/api/v1/query_range" --data-urlencode 'query={host="event-store-8569c899c4-gvr27"} |= ``' | jq
 ```
 
@@ -571,7 +565,7 @@ the necessary environment variables.
 
 In the case of local development or Docker setup, the default test values of `localhost` will suffice for access.
 When running the tests against Kubernetes, you will need to set the environment variables to the correct URL based on the deployment. Minikube can provide a list of URLs for the deployment:
-```shell
+```
 export EVENT_STORE_URL=$(minikube service --url event-store -n cqrs | head -n 1)
 export VIEW_STORE_URL=$(minikube service --url view-store -n cqrs | head -n 1)
 export AGGREGATE_VIEW_URL=$(minikube service --url aggregate-view -n cqrs | head -n 1)
@@ -579,13 +573,13 @@ export AGGREGATE_VIEW_URL=$(minikube service --url aggregate-view -n cqrs | head
 
 ### Smoke Test
 No additional environment variables are required to run the smoke test as these are single shot requests to the applications.
-```shell
+```
 mvn gatling:test -Dgatling.simulationClass=cqrs.SmokeTestSimulation
 ```
 
 ### Target Load Test
 The following environment variables can be used to configure the tests for either Target Load or Soak testing:
-```shell
+```
 export TARGET_TPS=10
 export TARGET_TPS_DURATION_IN_SECS=30
 export TARGET_TPS_RAMP_PERIOD_IN_SECS=5
@@ -594,7 +588,7 @@ mvn gatling:test -Dgatling.simulationClass=cqrs.TargetLoadSimulation
 
 ### Spike Test
 The following environment variables can be used to configure the tests for Spike testing:
-```shell
+```
 export SPIKE_BASE_TPS=10.0
 export SPIKE_RAMP_DURATION=10
 export SPIKE_MAX_TPS=50
@@ -604,7 +598,7 @@ mvn gatling:test -Dgatling.simulationClass=cqrs.SpikeTestSimulation
 
 ### Fatigue Test
 The following environment variables can be used to configure the tests for Fatigue testing:
-```shell
+```
 export FATIGUE_INITIAL_TARGET_TPS=10.0
 export FATIGUE_STEP_TPS_INCREASE=5.0
 export FATIGUE_STEP_DURATION=10
@@ -628,8 +622,8 @@ A full Jenkins installation and all required configuration is already provided t
 ### Docker
 
 To start up the Jenkins server and 2 agents you can use the following command:
-```shell
-docker compose -f docker-compose-jenkins.yml up -d
+```
+docker compose -f ./docker/docker-compose-jenkins.yml up -d --build --force-recreate
 ```
 
 Once the containers have started you can access the Jenkins UI at `http://localhost:8080/`.
@@ -637,11 +631,6 @@ Once the containers have started you can access the Jenkins UI at `http://localh
 Perform a login using the `Log in` link in the top-right with a username of `admin` and password of `butler`. 
 
 The `LoadTestJob` will perform the load test for the project.
-
-#### Jenkins agents
-The master node will orchestrate the tests, and the slave nodes will perform the actual load test requests.
-
-The master and slave node labels are defined in the `Jenkinsfile`.
 
 ### Kubernetes
 
@@ -674,6 +663,8 @@ To log in you will need the username of `jenkins-operator` and the password whic
 ```
 kubectl get secret -n jenkins jenkins-operator-credentials-ui -o 'jsonpath={.data.password}' | base64 -d
 ```
+
+The `cqrs-load-test` job will perform the load test for the project.
 
 ## Executing the tests
 

@@ -1,7 +1,0 @@
-configuration-as-code:1763.vb_fe9c1b_83f7b
-gatling:1.3.0
-git:5.2.0
-job-dsl:1.87
-parameter-separator:129.v86b_98b_cb_5274
-workflow-job:1385.vb_58b_86ea_fff1
-workflow-aggregator:596.v8c21c963d92d
