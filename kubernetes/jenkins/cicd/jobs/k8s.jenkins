@@ -6,7 +6,7 @@ pipelineJob('cqrs-load-test') {
       scm {
         git {
           remote {
-            url('http://code.webnodes.co.uk/geek/quarkus-cqrs.git')
+            url('https://github.com/cloudpro-dev/quarkus-cqrs.git')
           }
           branch('*/master')
         }

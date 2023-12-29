@@ -19,7 +19,7 @@
             <configVersion>2</configVersion>
             <userRemoteConfigs>
                 <hudson.plugins.git.UserRemoteConfig>
-                    <url>http://code.webnodes.co.uk/geek/quarkus-cqrs.git</url>
+                    <url>https://github.com/cloudpro-dev/quarkus-cqrs.git</url>
                 </hudson.plugins.git.UserRemoteConfig>
             </userRemoteConfigs>
             <branches>
