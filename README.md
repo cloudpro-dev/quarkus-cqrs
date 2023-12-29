@@ -630,41 +630,31 @@ Once the containers have started you can access the Jenkins UI at `http://localh
 
 Perform a login using the `Log in` link in the top-right with a username of `admin` and password of `butler`. 
 
-The `LoadTestJob` will perform the load test for the project.
+The `LoadTestJob` job can be run from the Jenkins UI to perform the load test for the project.
 
 ### Kubernetes
 
-Install the Jenkins Kubernetes Operator using the following command:
+Install the Jenkins Kubernetes Operator and setup a new Jenkins instance using the following command:
+
 ```
-kubectl apply -f https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/master/config/crd/bases/jenkins.io_jenkins.yaml
+./kubernetes/jenkins/setup.sh
 ```
 
-Create the `jenkins` namespace to hold all resources:
+To log in you will need the username and password which can be obtained using the following commands:
 ```
-kubectl create ns jenkins
+echo "Jenkins username: $(kubectl get secret -n jenkins jenkins-operator-credentials-ui -o 'jsonpath={.data.user}' | base64 -d)"
+echo "Jenkins password: $(kubectl get secret -n jenkins jenkins-operator-credentials-ui -o 'jsonpath={.data.password}' | base64 -d)"
 ```
-
-Install the Operator in `jenkins` namespace with:
-```
-kubectl apply -n jenkins -f https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/master/deploy/all-in-one-v1alpha2.yaml
-```
-
-To start up the Jenkins server use the following command:
-```
-kubectl apply -n jenkins -f kubernetes/jenkins/jenkins-instance.yml
-```
+_N.B: You will need to wait for the `jenkins-ui` instance to complete initialisation before you can obtain the password._
 
 Once the Jenkins instance has been deployed you will need to set up port forwarding to gain access to the Jenkins UI at `http://localhost:8080/`.
 ```
 kubectl port-forward -n jenkins jenkins-ui 8080:8080
 ```
 
-To log in you will need the username of `jenkins-operator` and the password which can be obtained using the following commands:
-```
-kubectl get secret -n jenkins jenkins-operator-credentials-ui -o 'jsonpath={.data.password}' | base64 -d
-```
+The `seed-job-agent-ui` pod will be automatically created and will load the `cqrs-load-test` from SCM.
 
-The `cqrs-load-test` job will perform the load test for the project.
+The `cqrs-load-test` job can then be run from the Jenkins UI to perform the load test for the project.
 
 ## Executing the tests
 
@@ -676,4 +666,3 @@ completes you will be able to do this via the UI.
 ### Subsequent runs
 Now you can click the `Build with parameters` button which will provide a UI with all the load test attributes which
 can be configured on a per-run basis.
-
