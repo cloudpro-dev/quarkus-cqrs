@@ -11,13 +11,10 @@ services:
       - ./jenkins/casc.d:/var/jenkins_home/casc.d/:ro
       # Mounting the ssh private key as "container secret" makes it available in JCasc as the variable ${SSH_AGENT_KEY}
       - ./jenkins/secrets/id_jenkins.pem:/run/secrets/SSH_AGENT_KEY:ro
-      - ..:/var/repo/code:ro
     environment:
       - JENKINS_EXT_URL=http://localhost:8080
       - CASC_JENKINS_CONFIG=/var/jenkins_home/casc.d/
-      - org.jenkinsci.plugins.durabletask.BourneShellScript.LAUNCH_DIAGNOSTICS=true
       - PUBLIC_IP
-      - JAVA_OPTS=-Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true
     networks:
       - cqrs
   jenkins-agent-1:
@@ -28,8 +25,6 @@ services:
     volumes:
       - jenkins-agent1-data:/home/jenkins:rw
       - /var/run/docker.sock:/var/run/docker.sock:rw
-      # Mount the project locally to the Jenkins agent
-      - ..:/var/repo/code:ro
     environment:
       - JENKINS_AGENT_SSH_PUBKEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBpNqXQ4x7fPPUBbYPxKF77Zqq6d35iPCD2chg644OUD noone@localhost.local
     networks:
@@ -42,8 +37,6 @@ services:
     volumes:
       - jenkins-agent2-data:/home/jenkins:rw
       - /var/run/docker.sock:/var/run/docker.sock:rw
-      # Mount the project locally to the Jenkins agent
-      - ..:/var/repo/code:ro
     environment:
       - JENKINS_AGENT_SSH_PUBKEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBpNqXQ4x7fPPUBbYPxKF77Zqq6d35iPCD2chg644OUD noone@localhost.local
     networks:
@@ -56,8 +49,6 @@ services:
     volumes:
       - jenkins-agent3-data:/home/jenkins:rw
       - /var/run/docker.sock:/var/run/docker.sock:rw
-      # Mount the project locally to the Jenkins agent
-      - ..:/var/repo/code:ro
     environment:
       - JENKINS_AGENT_SSH_PUBKEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBpNqXQ4x7fPPUBbYPxKF77Zqq6d35iPCD2chg644OUD noone@localhost.local
     networks:
