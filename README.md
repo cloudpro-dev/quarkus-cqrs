@@ -255,22 +255,8 @@ _Note: This will block the current terminal session until you exit._
 
 Before we can deploy the applications we must set up the necessary infrastructure in the Kubernetes cluster.
 
-Create a new namespace for the whole platform:
 ```
-kubectl create ns cqrs
-```
-
-Deploy the infrastructure to Kubernetes:
-```
-kubectl apply -f ./kubernetes/postgres.yml -n cqrs
-kubectl apply -f ./kubernetes/mongo.yml -n cqrs
-kubectl apply -f ./kubernetes/kafka.yml -n cqrs
-```
-
-To access the Kafka server in the Kubernetes cluster, we must add a new Pod running Kafka client tools:
-```
-kubectl run kafka-client -n cqrs --rm -ti --image bitnami/kafka:3.4 -- bash
-I have no name!@kafka-client:/$ /opt/bitnami/kafka/bin/kafka-console-consumer.sh --bootstrap-server=BROKER://kafka-svc.cqrs.svc.cluster.local:9092 --topic event-store --from-beginning --partition 0
+cd kubernetes && ./setup.sh
 ```
 
 ## Deploying the applications
