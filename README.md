@@ -422,12 +422,7 @@ docker compose -f ./docker/docker-compose-monitoring.yml up -d
 To set up the monitoring on the Kubernetes cluster, you can run the setup script which will deploy all necessary
 resources:
 ```
-./kubernetes/monitoring/setup.sh
-```
-
-In the event that you want to delete all the deployed Kubernetes monitoring, you can run the tear down script:
-```
-./kubernetes/monitoring/teardown.sh
+cd kubernetes/monitoring && setup.sh
 ```
 
 Below is more information on each of the specific technologies used to provide observability and how to call some of the
@@ -637,7 +632,7 @@ The `LoadTestJob` job can be run from the Jenkins UI to perform the load test fo
 Install the Jenkins Kubernetes Operator and setup a new Jenkins instance using the following command:
 
 ```
-./kubernetes/jenkins/setup.sh
+cd kubernetes/jenkins && setup.sh
 ```
 
 To log in you will need the username and password which can be obtained using the following commands:

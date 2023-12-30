@@ -10,4 +10,4 @@ kubectl create ns jenkins && \
 kubectl apply -n jenkins -f https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/master/deploy/all-in-one-v1alpha2.yaml && \
 
 # Create a Jenkins instance
-kubectl apply -n jenkins -f kubernetes/jenkins/jenkins-instance.yml
+kubectl apply -n jenkins -f ./jenkins-instance.yml
